@@ -1,0 +1,77 @@
+<!-- 
+    PulsEc
+    Beneharo González González
+    2014
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0"/>
+        
+        <link rel="stylesheet" href="style/jquery.mobile-1.4.2.min.css" />
+        <link rel="stylesheet" href="style/graphics.css" />
+        <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+        <script type="text/javascript" src="js/jquery.mobile-1.4.2.min.js"></script>
+        <script type="text/javascript" src="js/d3.min.js" charset="utf-8"></script>
+        <script type="text/javascript" src="js/main.js"></script>
+        <script type="text/javascript" src="js/graphics.js"></script>        
+        
+    </head>
+    <body>
+        <!-- Main page -->
+        <div data-role="page" id="main-page">
+            <header>
+                <h1>PULSEC</h1>
+            </header>
+            <div data-role="content" class="ui-content">
+
+                <a href="#page1"> <button id="btn-page1" >Page1</button> </a>
+                <a href="#page2"> <button id="btn-page2" >Page2</button> </a>
+                <a href="#page3"> <button id="btn-page3" >Page3</button> </a>
+                
+            </div>
+        </div>
+        
+        <!-- Page1 -->
+        <div data-role="page" id="page1">
+            <div data-role="header">
+                <h1>PULSEC</h1>
+            </div>
+            <div data-role="content" class="ui-content">
+                 
+                Prueba
+                <button onclick="draw();">Dibujar Gráfica</button>
+                
+            </div>
+            <div data-role="panel" id="left-panel" data-position="left" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">
+                Panel izquierdo!
+            </div>
+        </div>
+        
+        <!-- Page2 -->
+        <div data-role="page" id="page2">
+            <div data-role="header">
+                <h1>PULSEC</h1>
+            </div>
+            <div data-role="content" class="ui-content">
+                <article id="page2-content" data-type="list">
+                    Test data.
+                </article>
+            </div>
+        </div>
+        
+        <!-- Page3 -->
+        <div data-role="page" id="page3">
+            <div data-role="header">
+                <h1>PULSEC</h1>
+            </div>
+            <div data-role="content" class="ui-content">
+                <article id="page1-content" data-type="list">
+                    Test data.
+                </article>
+            </div>
+        </div>
+    </body>
+</html>
