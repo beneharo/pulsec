@@ -1,13 +1,12 @@
 {
-  "name": "PulsEc",
+  "name": "Pulsec",
   "version": "0.1",
   "description": "Pulso Economico",
   "launch_path": "/index.html",
   "permissions": {
     "storage": {
       "description": "It's necessary to store data in the database."
-    },
-    "systemXHR": {}
+    }
   },
   "developer": {
     "name": "Beneharo Gonzalez Gonzalez",

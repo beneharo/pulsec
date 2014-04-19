@@ -1,20 +1,20 @@
 
 var URL = "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=c0bfe128-69f4-4751-85e1-6d46108acba9&?callback=?";
-var title = "";         // TÌtulo del recurso que se est· obteniendo.
+var title = "";         // T√≠tulo del recurso que se est√° obteniendo.
 var stub = "";          // Variables que van en las filas del dataset.
 var heading = "";       // Variables que van en las columnas del dataset.
 var categories = {}; 
 var codes = {};
 var labels = {};
-var temporals;          // Variables que se corresponden con el cubrimiento temporal.
-var spatials;           // Variables que se corresponden con el cubrimiento geogr·fico.
-var cont_variable;      // Variable que act˙a como dimensiÛn de medida.
-var surveyTitle = "";   // TÌtulo de la operaciÛn estadÌstica en la que se publica el recurso.
-var data = "";          // InformaciÛn de las variables.
+var temporals = [];     // Variables que se corresponden con el cubrimiento temporal.
+var spatials = [];      // Variables que se corresponden con el cubrimiento geogr√°fico.
+var cont_variable;      // Variable que act√∫a como dimensi√≥n de medida.
+var surveyTitle = "";   // T√≠tulo de la operaci√≥n estad√≠stica en la que se publica el recurso.
+var data = "";          // Informaci√≥n de las variables.
 var valueMap = {};
 
-$(document).on('pageinit', function() {
-    $( "#left-panel" ).empty();
+$(document).on('pagecreate', '#page1', function() {
+    $(".newSelect").remove();
     $("#page1").on("swiperight", function() {
         $("#left-panel").panel( "open");
     });
@@ -71,7 +71,7 @@ function loadData () {
 }
 
 /**
-*   AÒade opciones a los men˙s desplegables.
+*   A√±ade opciones a los men√∫s desplegables.
 */
 function fillSelectors() {
 
@@ -80,8 +80,16 @@ function fillSelectors() {
     // Filas
     for(var i = 0; i < stub.length; i++) {
         variable = stub[i];
-        $('#left-panel').append('<label for=\"select-s-' + i + '\" class="\select\">' + variable + ':</label>');
-        $('#left-panel').append('<select class=\"newSelect\" name=\"select-s-' + i + '\" id=\"select-s-' + i + '\" data-mini=\"true\"></select>');
+        $('#left-panel').append('<label for=\"select-s-' + i + '\">' + variable + ':</label>');
+        $('<select/>', {
+          name:         'select-s-' + i,
+          id:           'select-s-' + i,
+          'class':      'newSelect',
+          'data-mini':  'true',
+          'multiple' :  'multiple',
+          'data-native-menu': 'false'
+        }).appendTo('#left-panel');
+        
         for(var j = 0; j < codes[variable].length; j++) {
             code = codes[variable][j];
             $('<option/>', {
@@ -89,32 +97,82 @@ function fillSelectors() {
                 html: labels[variable][code]
             }).appendTo('#select-s-' + i);
         }
+        // Selecciona por defecto la primera opci√≥n.
+        $('#select-s-' + i + ' option:first').attr('selected','selected');
     }
     // Columnas
     for(var i = 0; i < heading.length; i++) {
         variable = heading[i];
-        $('#left-panel').append('<label for=\"select-h-' + i + '\" class=\"select\">' + variable + ':</label>');
-        $('#left-panel').append('<select class=\"newSelect\" name=\"select-h-' + i + '\" id=\"select-h-' + i + '\" data-mini=\"true\" nativeMenu=\"false\"></select>');
+        $('#left-panel').append('<label for=\"select-h-' + i + '\">' + variable + ':</label>');
+        $('<select/>', {
+          name:         'select-h-' + i,
+          id:           'select-h-' + i,
+          'class':      'newSelect',
+          'data-mini':  'true',
+          'multiple' :  'multiple',
+          'data-native-menu': 'false'
+        }).appendTo('#left-panel');
+
         for(var j = 0; j < codes[variable].length; j++) {
             code = codes[variable][j];
             $('<option/>', {
                 value: code,
                 html: labels[variable][code]
             }).appendTo('#select-h-' + i);
-        }        
+        }
+        // Selecciona por defecto la primera opci√≥n.
+        $('#select-h-' + i + ' option:first').attr('selected','selected');
     }
-    $("#page1").trigger("create");  // Con esta lÌnea los elementos del select toman el estilo adecuado.
-    $("#left-panel").trigger( "updatelayout" );
+    $("#page1").trigger("create");  // Con esta l√≠nea los elementos del select toman el estilo adecuado.
+    $("#selectors").trigger( "updatelayout" );
 }
 
 function draw() {
     var key = [];
     $(".newSelect").each(function (i) { 
-        if ($(this).val() != '') {  // Comprueba que no est· vacÌo.
-           key.push($(this).val()); // Genera el array que ser· utilizado como key.
+        if ($(this).val() != '') {  // Comprueba que no est√° vac√≠o.
+           key.push($(this).val()); // Genera el array que ser√° utilizado como key.
        }
     });
-    
-    alert('El valor es: ' + valueMap[key]);
-    
+    var dataset = [];
+    key = cartesian(key);
+    for(var i = 0; i < key.length; i++) {
+      //alert('El valor es: ' + valueMap[key[i]]);
+      dataset.push(valueMap[key[i]]);
+    }
+    drawBarChart(dataset);    
 }
+
+/*
+ * Recibe como argumento un array de arrays.
+ * Devuelve todas las posibles combinaciones de sus elementos. 
+*/
+function cartesian(arg) {
+    var r = [], max = arg.length-1;
+    function helper(arr, i) {
+        for (var j=0, l=arg[i].length; j<l; j++) {
+            var a = arr.slice(0);
+            a.push(arg[i][j]);
+            if (i==max) {
+                r.push(a);
+            } else
+                helper(a, i+1);
+        }
+    }
+    helper([], 0);
+    return r;
+};
+
+
+function elementIs(value, index) {
+  if(value[element['index']] == element['value']) return value;
+}
+
+function o(i, value) {
+  var obj = {};
+  obj['index'] = i;
+  obj['value'] = value;
+  return obj;
+}
+
+element = {'index' : 0, 'value' : 1};
