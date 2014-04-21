@@ -4,8 +4,11 @@
   "description": "Pulso Economico",
   "launch_path": "/index.html",
   "permissions": {
-    "storage": {
-      "description": "It's necessary to store data in the database."
+    "geolocation": {
+      "description" : "Used to locate user."
+    },
+    "systemXHR": {
+      "description": "Required to make Network calls."
     }
   },
   "developer": {

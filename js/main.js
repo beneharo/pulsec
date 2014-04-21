@@ -13,6 +13,25 @@ var surveyTitle = "";   // Título de la operación estadística en la que se pu
 var data = "";          // Información de las variables.
 var valueMap = {};
 
+$(document).ready(function(){
+  $("#btnLocateMe").click(function(){
+    findMyCurrentLocation();
+  });
+  
+  $('#checkbox-value').change(function() {
+    if($(this).is(":checked")) {
+      d3.select("svg")
+      .selectAll("text")
+      .style('display', "block");
+    } else {
+      d3.select("svg")
+      .selectAll("text")
+      .style('display', "none");
+    }
+  });
+  
+});
+
 $(document).on('pagecreate', '#page1', function() {
     $(".newSelect").remove();
     $("#page1").on("swiperight", function() {
@@ -137,7 +156,6 @@ function draw() {
     var dataset = [];
     key = cartesian(key);
     for(var i = 0; i < key.length; i++) {
-      //alert('El valor es: ' + valueMap[key[i]]);
       dataset.push(valueMap[key[i]]);
     }
     drawBarChart(dataset);    

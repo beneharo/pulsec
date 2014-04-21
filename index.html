@@ -15,8 +15,10 @@
         <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.4.2.min.js"></script>
         <script type="text/javascript" src="js/d3.min.js" charset="utf-8"></script>
+        <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
-        <script type="text/javascript" src="js/graphics.js"></script>        
+        <script type="text/javascript" src="js/graphics.js"></script>
+        <script type="text/javascript" src="js/geolocation.js"></script>     
         
     </head>
     <body>
@@ -27,8 +29,8 @@
             </header>
             <div data-role="content" class="ui-content">
 
-                <a href="#page1"> <button id="btn-page1" >Page1</button> </a>
-                <a href="#page2"> <button id="btn-page2" >Page2</button> </a>
+                <a href="#page1"> <button id="btn-page1" >Visualización</button> </a>
+                <a href="#page2"> <button id="btn-page2" >Geolocalización</button> </a>
                 <a href="#page3"> <button id="btn-page3" >Page3</button> </a>
                 
             </div>
@@ -36,29 +38,31 @@
         
         <!-- Page1 -->
         <div data-role="page" id="page1">
-            <div data-role="header">
+            <div data-role="header" data-add-back-btn="true">
                 <h1>PULSEC</h1>
             </div>
             <div role="main" id="page1-main" class="ui-content">
                  
                 <button onclick="draw();">Dibujar Gráfica</button>
                 <div id="graphics"></div>
+                
+                <input type="checkbox" name="checkbox-value" id="checkbox-value" checked="checked"/>
+                <label for="checkbox-value">Mostrar valor</label>
  
             </div>
             <div data-role="panel" id="left-panel" data-position="left" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">
-
+          
             </div>
         </div>
         
-        <!-- Page2 -->
+        <!-- GeoLocate -->
         <div data-role="page" id="page2">
-            <div data-role="header">
+            <div data-role="header" data-add-back-btn="true">
                 <h1>PULSEC</h1>
             </div>
             <div data-role="content" class="ui-content">
-                <article id="page2-content" data-type="list">
-                    Test data.
-                </article>
+                <a href="#" id="btnLocateMe" data-role="button">LocateMe</a>
+                <div id="searchResults"></div>  
             </div>
         </div>
         
