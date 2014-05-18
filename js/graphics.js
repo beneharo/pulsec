@@ -14,16 +14,17 @@ function drawBarChart(dataset) {
             .append("svg")
             .attr("width", w + margin.left + margin.right)
             .attr("height", h + margin.top + margin.bottom)
+            .attr("preserveAspectRatio", "none")
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");;
   
   var tip = d3.tip()
   .attr('class', 'd3-tip')
-  .offset([-10, 0])
+  .offset([-5, 0])
   .html(function(d) {
-    return "<strong>Value:</strong> <span style='color:red'>" + d + "</span>";
+    return "<span style='color:red'>" + d + "</span>";
   });
-  
+    
   svg.call(tip);
   
   var xScale = d3.scale.linear()
@@ -32,7 +33,7 @@ function drawBarChart(dataset) {
 
   var yScale = d3.scale.linear()
     .domain([d3.min(dataset), d3.max(dataset)])
-    .rangeRound([10, h]);
+    .range([h, 0]);
   
   var xAxis = d3.svg.axis()
     .scale(xScale)
@@ -52,37 +53,15 @@ function drawBarChart(dataset) {
       return xScale(i);
     })
    .attr("y", function(d) {
-      //return h - d; 
-      return h - yScale(d);
+      return yScale(d);
     })
    .attr("width", barWidth)
    .attr("height", function(d) {
-      return yScale(d);
+      return h - yScale(d);
     })
-    .attr("fill", "teal")
+    .attr("fill", "green")
     .on('mouseover', tip.show)
     .on('mouseout', tip.hide);
-   
-  svg.selectAll("text")
-     .data(dataset)
-     .enter()
-     .append("text")
-     .text(function(d) {
-        return d;
-     })
-     .attr("text-anchor", "middle")
-     .attr("x", function(d, i) {
-        return xScale(i) + barWidth;
-     })
-     .attr("y", function(d) {
-        return h - yScale(d);
-     })
-     .attr("dx", -barWidth/2)
-     .attr("dy", "1.2em")
-     .attr("font-family", "sans-serif")
-     .attr("font-size", "11px")
-     .attr("fill", "black");
-   
   
    svg.append("g")
     .attr("class", "axis")

@@ -13,8 +13,21 @@ function findMyCurrentLocation(){
  
 function showCurrentLocation(position){
   $("#searchResults").html("Your location details: <br> Current Latitude : " + position.coords.latitude + " , Longitude : " + position.coords.longitude);
+  
+  $.ajax({
+  type: 'GET',
+  url: "http://open.mapquestapi.com/nominatim/v1/reverse?lat=" + position.coords.latitude + "&lon=" + position.coords.longitude,
+  data: {
+    key: "value"
+  },
+  dataType: "xml",
+  success: function (xml) {
+    var location = $(xml).find('state').first().text();
+    alert("Su localización es: " + location);
+  }   
+});
 }
  
-function errorHandler(error){
+function errorHandler(error) {
   $("#searchResults").html("Error while retrieving current position. Error code: " + error.code + ",Message: " + error.message);
 }
