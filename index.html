@@ -12,6 +12,7 @@
         
         <link rel="stylesheet" href="style/jquery.mobile-1.4.2.min.css" />
         <link rel="stylesheet" href="style/graphics.css" />
+        <link rel="stylesheet" href="style/loading.css" />
         <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.4.2.min.js"></script>
         <script type="text/javascript" src="js/d3.min.js" charset="utf-8"></script>
@@ -27,14 +28,12 @@
             <header>
                 <h1>PULSEC</h1>
             </header>
+            <div id='loadingDiv'><img src="style/images/ajax-loader.gif"/></div>
             <div data-role="content" class="ui-content">
 
                 <a href="#page1"> <button id="btn-page1" >Visualización</button> </a>
                 <label for="select-indicadores">Indicadores</label>
                 <select id="select-indicadores" name="select-indicadores">
-                  <option value="tmp/ipc.json">IPC</option>
-                  <option value="tmp/cifras-padronales.json">Cifras Padronales</option>
-                  <option value="tmp/vivienda-libre.json">Precios de Vivienda Libre</option>
                 </select>
                 <a href="#page2"> <button id="btn-page2" >Geolocalización</button> </a>
                 

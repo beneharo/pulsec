@@ -1,5 +1,6 @@
 
-var URL = "tmp/ipc.json";
+var URL_INDICADORES = "tmp/indicadores.json";
+var URL = "http://banot.etsii.ull.es/alu4240/getJSON.php";
 var title = "";         // Título del recurso que se está obteniendo.
 var stub = "";          // Variables que van en las filas del dataset.
 var heading = "";       // Variables que van en las columnas del dataset.
@@ -17,20 +18,29 @@ var periods = {}; // M: Mensual, Q: Trimestral, Y: Anual
 
 $(document).ready(function(){
   
-  $("#select-indicadores").val($("#select-indicadores option:first").val());
+  initializeSelect();
 
   $("#btnLocateMe").click(function(){
     findMyCurrentLocation();
   });
   
   $("#btn-page1").click(function(){
-    if(indicador != $("#select-indicadores").val()) {
+    if(indicador != $("#select-indicadores").val()) {   
       indicador = $("#select-indicadores").val();
       loadData(indicador);
       initialize();
     }
     
   });
+  
+  var $loading = $('#loadingDiv').hide();
+  $(document)
+    .ajaxStart(function () {
+      $loading.show();
+    })
+    .ajaxStop(function () {
+      $loading.hide();
+    });
 });
 
 $(document).on('pagecreate', '#page1', function() {
@@ -41,67 +51,19 @@ $(document).on('pagecreate', '#page1', function() {
     initialize();
 });
 
-function loadData (urlData) {
-
-        $.ajax({
+function initializeSelect() {
+  $.ajax({
             async : false,
             dataType: "json",
-            url: urlData,
+            url: URL_INDICADORES,
             type : "GET",
             success: function(jsondata) {
-                title = jsondata['title'];
-                stub = jsondata['stub'];
-                heading = jsondata['heading'];
-
-                var tmp;
-                
-                tmp = jsondata['categories'];
-                
-                var variable = "";
-                
-                for(var i = 0; i < tmp.length; i++) {
-                    variable = tmp[i]['variable'];
-                    codes[variable] = tmp[i]['codes'];
-                    labels[variable] = {};
-                    for(var j = 0; j < tmp[i]['labels'].length; j++) {
-                        labels[variable][tmp[i]['codes'][j]] = tmp[i]['labels'][j];
-                    }
+                for(var i = 0; i < jsondata.length; i++) {
+                  $('<option/>', {
+                      value:  jsondata[i]['url'],
+                      html:   jsondata[i]['indicador']
+                  }).appendTo('#select-indicadores');
                 }
-                
-                temporals = jsondata['temporals'];
-                spatials = jsondata['spatials'];
-                cont_variable = jsondata['contVariable'];
-                surveyTitle = jsondata['surveyTitle'];
-                
-                data = jsondata['data'];
-                for(var i = 0; i < data.length; i++) {
-                    valueMap[data[i]['dimCodes']] = data[i]['Valor'];
-                }
-                
-                // Tratamiento de variables temporales
-                var code = "";
-                var regExpYear = /^\d{4}$/;     // Detección del código Anual
-                var regExpM = /^\d{4}M\d{2}$/;  // Detección del código Mes
-                var regExpQ = /^\d{4}Q\d{1}$/; // Detección del código Trimestre
-                periods = {};                   // Se reinicia la variable.
-                
-                for(var i = 0; i < temporals.length; i++) {
-                  
-                  for(var j = 0; j < codes[temporals[i]].length; j++) {
-                    code = codes[temporals[i]][j];
-
-                    if(regExpYear.test(code)) {
-                      periods['Y'] = true;
-                    } else if(regExpM.test(code)) {
-                      periods['M'] = true;
-                    } else if(regExpQ.test(code)) {
-                      periods['Q'] = true;
-                    } else {
-                      // Variable sin contemplar
-                    }
-                  }
-                }
-
             },
             error:function(xhr){
               console.log("Error:");
@@ -109,6 +71,110 @@ function loadData (urlData) {
               alert("An error occured: " + xhr.status + " " + xhr.statusText);
             }
         });
+  $("#select-indicadores").val($("#select-indicadores option:first").val());
+  $("#select-indicadores").selectmenu("refresh");
+}
+
+function successJSON (jsondata) {
+  // Reinicializar variables
+  stub = "";
+  heading = "";
+  categories = {}; 
+  codes = {};
+  labels = {};
+  temporals = [];
+  spatials = [];
+  cont_variable = "";
+  surveyTitle = "";
+  data = "";
+  valueMap = {};
+  
+  title = jsondata['title'];
+  stub = jsondata['stub'];
+  heading = jsondata['heading'];
+
+  var tmp;
+  
+  tmp = jsondata['categories'];
+  
+  var variable = "";
+  
+  for(var i = 0; i < tmp.length; i++) {
+      variable = tmp[i]['variable'];
+      codes[variable] = tmp[i]['codes'];
+      labels[variable] = {};
+      for(var j = 0; j < tmp[i]['labels'].length; j++) {
+          labels[variable][tmp[i]['codes'][j]] = tmp[i]['labels'][j];
+      }
+  }
+  
+  temporals = jsondata['temporals'];
+  spatials = jsondata['spatials'];
+  cont_variable = jsondata['contVariable'];
+  // En caso de no existir, el vector quedará vacío.
+  if(temporals == undefined) {
+    temporals = [];
+  }
+  if(spatials == undefined) {
+    spatials = [];
+  }
+  if(cont_variable == undefined) {
+    cont_variable = "";
+  }
+  
+  surveyTitle = jsondata['surveyTitle'];
+  
+  data = jsondata['data'];
+  for(var i = 0; i < data.length; i++) {
+      valueMap[data[i]['dimCodes']] = data[i]['Valor'];
+  }
+  
+  // Tratamiento de variables temporales
+  var code = "";
+  var regExpYear = /^\d{4}$/;     // Detección del código Anual
+  var regExpM = /^\d{4}M\d{2}$/;  // Detección del código Mes
+  var regExpQ = /^\d{4}Q\d{1}$/; // Detección del código Trimestre
+  periods = {};                   // Se reinicia la variable.
+  
+  for(var i = 0; i < temporals.length; i++) {
+    
+    for(var j = 0; j < codes[temporals[i]].length; j++) {
+      code = codes[temporals[i]][j];
+
+      if(regExpYear.test(code)) {
+        periods['Y'] = true;
+      } else if(regExpM.test(code)) {
+        periods['M'] = true;
+      } else if(regExpQ.test(code)) {
+        periods['Q'] = true;
+      } else {
+        // Variable sin contemplar
+      }
+    }
+  }
+}
+            
+function loadData(urlData) {
+  urlData = urlData.replace("&", ";;amp;;");
+  $.ajax({
+      async : false,
+      data : {
+        urlData : urlData
+      },
+      dataType: "text",
+      url: URL,
+      crossDomain: true,
+      type : "GET",
+      success: function(jsondata) {
+          jsondata = jsondata.substring(1, jsondata.length-2); // Eliminar el primer y último paréntesis con el ;
+          successJSON(JSON.parse(jsondata));
+      },
+      error:function(xhr){
+        console.log("Error:");
+        console.log(JSON.stringify(xhr));
+        alert("An error occured: " + xhr.status + " " + xhr.statusText);
+      }
+  });
 }
 
 function fillSelectors(variable, type, index) {
@@ -229,24 +295,49 @@ function fillSelectors(variable, type, index) {
         $("#" + selectorName).selectmenu("refresh");
       });
     }
-    
-  }
-
-  $('<select/>', {
-    name:         'select-' + type + '-' + index,
-    id:           'select-' + type + '-' + index,
-    'data-filter':'true',
-    'class':      'newSelect',
-    'data-mini':  'true',
-    'multiple' :  'multiple',
-    'data-native-menu': 'false'
-  }).appendTo('#left-panel');
-   
-  // Comprueba que es una variable temporal
-  if(temporals.indexOf(variable) != -1) {
+    // Define el menú de selección
+    $('<select/>', {
+      name:         'select-' + type + '-' + index,
+      id:           'select-' + type + '-' + index,
+      'class':      'newSelect',
+      'data-mini':  'true',
+      'multiple' :  'multiple',
+      'data-native-menu': 'false',
+      'data-filter': 'true'
+    }).appendTo('#left-panel');
+    // Rellena el menú de selección
     var selectorName = 'select-' + type + '-' + index;
     fillTemporalSelectors(selectorName, variable);
-  } else {
+  
+  } else if(spatials.indexOf(variable) != -1) { // Variable Espacial
+    // Define el menú de selección
+    $('<select/>', {
+      name:         'select-' + type + '-' + index,
+      id:           'select-' + type + '-' + index,
+      'class':      'newSelect',
+      'data-mini':  'true',
+      'multiple' :  'multiple',
+      'data-native-menu': 'false'
+    }).appendTo('#left-panel');
+    
+    for(var j = 0; j < codes[variable].length; j++) {
+      code = codes[variable][j];
+      $('<option/>', {
+          value: code,
+          html: labels[variable][code]
+      }).appendTo('#select-' + type + '-' + index);
+    }
+    
+  } else { // Variable dimensión medida.
+    // Define el menú de selección
+    $('<select/>', {
+      name:         'select-' + type + '-' + index,
+      id:           'select-' + type + '-' + index,
+      'class':      'newSelect',
+      'data-mini':  'true',
+      'data-native-menu': 'false'
+    }).appendTo('#left-panel');
+    
     for(var j = 0; j < codes[variable].length; j++) {
       code = codes[variable][j];
       $('<option/>', {
@@ -299,11 +390,12 @@ function fillTemporalSelectors(selectorName, variable) {
 *   Inicializa las opciones de los menús desplegables.
 */
 function initialize() {
-
-    var variable = '';
-      
-    $("#left-panel").empty();
     
+    var variable = '';
+    
+    $(".newSelect").remove();  
+    $("#left-panel").empty();
+
     // Filas
     for(var i = 0; i < stub.length; i++) {
         variable = stub[i];
@@ -314,16 +406,24 @@ function initialize() {
         variable = heading[i];
         fillSelectors(variable, 'h', i);
     }
-    
+       
     $("#page1").trigger("create");  // Con esta línea los elementos del select toman el estilo adecuado.
     $("#selectors").trigger( "updatelayout" );
+
 }
 
 function draw() {
+    var temp = [];
     var key = [];
     $(".newSelect").each(function (i) { 
         if ($(this).val() != '') {  // Comprueba que no está vacío.
-           key.push($(this).val()); // Genera el array que será utilizado como key.
+           if (!($(this).val() instanceof Array)) { // En caso de selección simple, incluir la opción en un array de 1 elemento.
+             temp = [];
+             temp.push($(this).val());
+             key.push(temp);
+           } else {
+             key.push($(this).val()); // Genera el array que será utilizado como key.
+           }
        }
     });
     var dataset = [];
@@ -353,17 +453,3 @@ function cartesian(arg) {
     helper([], 0);
     return r;
 };
-
-
-function elementIs(value, index) {
-  if(value[element['index']] == element['value']) return value;
-}
-
-function o(i, value) {
-  var obj = {};
-  obj['index'] = i;
-  obj['value'] = value;
-  return obj;
-}
-
-element = {'index' : 0, 'value' : 1};
