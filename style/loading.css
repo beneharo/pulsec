@@ -1,14 +1,29 @@
-div#loadingDiv
-{
-    display: none;
-    width:100px;
-    height: 100px;
-    position: fixed;
-    top: 50%;
+div #loadingDiv
+{  
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:1000;
+    background-color:grey;
+    opacity: .9;
+}
+
+.ajax-loader {
+    position: absolute;
     left: 50%;
-    text-align:center;
-    margin-left: -50px;
-    margin-top: -100px;
-    z-index:2;
-    overflow: auto;
-}   
+    top: 50%;
+    margin-left: -32px; /* -1 * image width / 2 */
+    margin-top: -32px;  /* -1 * image height / 2 */
+    display: block;     
+}
+
+.ajax-loader-text {
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    padding-top: 100px;
+}

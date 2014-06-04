@@ -7,6 +7,7 @@ var heading = "";       // Variables que van en las columnas del dataset.
 var categories = {}; 
 var codes = {};
 var labels = {};
+var variables = [];     // Conjunto total de variables.
 var temporals = [];     // Variables que se corresponden con el cubrimiento temporal.
 var spatials = [];      // Variables que se corresponden con el cubrimiento geográfico.
 var cont_variable;      // Variable que actúa como dimensión de medida.
@@ -27,10 +28,19 @@ $(document).ready(function(){
   $("#btn-page1").click(function(){
     if(indicador != $("#select-indicadores").val()) {   
       indicador = $("#select-indicadores").val();
-      loadData(indicador);
-      initialize();
+      d3.selectAll("svg").remove();  // Borra el área de representación.
+      try {
+        loadData(indicador);
+        initialize();
+      } catch(err) {
+         alert("Error: " + err.message + "\n\n");
+         $(location).attr('href', 'index.html');
+      }
     }
-    
+  });
+  
+  $("#btn-bar-chart").click(function(){
+    draw();
   });
   
   var $loading = $('#loadingDiv').hide();
@@ -46,7 +56,16 @@ $(document).ready(function(){
 $(document).on('pagecreate', '#page1', function() {
     $(".newSelect").remove();
     $("#page1").on("swiperight", function() {
-        $("#left-panel").panel( "open");
+        $("#left-panel").panel("open");
+    });
+    $("#page1").on("swipeleft", function() {
+        $("#right-panel").panel("open");
+    });
+    $("#left-panel").on("panelopen", function() {
+        $("open-left-panel").buttonMarkup({ icon: "carat-l" });
+    });
+    $("#left-panel").on("panelclose", function() {
+        $("open-left-panel").attr('data-icon','carat-r');
     });
     initialize();
 });
@@ -82,6 +101,7 @@ function successJSON (jsondata) {
   categories = {}; 
   codes = {};
   labels = {};
+  variables = [];
   temporals = [];
   spatials = [];
   cont_variable = "";
@@ -93,6 +113,8 @@ function successJSON (jsondata) {
   stub = jsondata['stub'];
   heading = jsondata['heading'];
 
+  $("#hdr-h1").html("PULSEC / " + title);
+  
   var tmp;
   
   tmp = jsondata['categories'];
@@ -101,6 +123,7 @@ function successJSON (jsondata) {
   
   for(var i = 0; i < tmp.length; i++) {
       variable = tmp[i]['variable'];
+      variables.push(variable);
       codes[variable] = tmp[i]['codes'];
       labels[variable] = {};
       for(var j = 0; j < tmp[i]['labels'].length; j++) {
@@ -172,7 +195,7 @@ function loadData(urlData) {
       error:function(xhr){
         console.log("Error:");
         console.log(JSON.stringify(xhr));
-        alert("An error occured: " + xhr.status + " " + xhr.statusText);
+        alert("Ha ocurrido un error: " + xhr.status + " " + xhr.statusText);
       }
   });
 }
@@ -186,56 +209,56 @@ function fillSelectors(variable, type, index) {
   
   // Comprueba que es una variable temporal
   if(temporals.indexOf(variable) != -1) {
-    $('<label/>', {
-      'for':        'select-flipswitch-' + type + '-' + index,
-      html:         'Rango'
-    }).appendTo('#left-panel');
-    $('<select/>', {
-      name:         'select-flipswitch-' + type + '-' + index,
-      id:           'select-flipswitch-' + type + '-' + index,
-      'data-role':  'flipswitch',
-      'data-native-menu': 'false'
-    }).appendTo('#left-panel');
-    $('<option/>', {
-        value: 'si',
-        html: 'Sí'
-    }).appendTo('#select-flipswitch-' + type + '-' + index);
-    $('<option/>', {
-        value: 'no',
-        html: 'No'
-    }).appendTo('#select-flipswitch-' + type + '-' + index);
+    //$('<label/>', {
+    //  'for':        'select-flipswitch-' + type + '-' + index,
+    //  html:         'Rango'
+    //}).appendTo('#left-panel');
+    //$('<select/>', {
+    //  name:         'select-flipswitch-' + type + '-' + index,
+    //  id:           'select-flipswitch-' + type + '-' + index,
+    //  'data-role':  'flipswitch',
+    //  'data-native-menu': 'false'
+    //}).appendTo('#left-panel');
+    //$('<option/>', {
+    //    value: 'si',
+    //    html: 'Sí'
+    //}).appendTo('#select-flipswitch-' + type + '-' + index);
+    //$('<option/>', {
+    //    value: 'no',
+    //    html: 'No'
+    //}).appendTo('#select-flipswitch-' + type + '-' + index);
     
     // RangeSlider
     
-    $('<div/>', {
-                id:             'rangeslider' + type + '-' + index,
-                'class':        'rslider',
-                'data-role':    'rangeslider'
-    }).appendTo('#left-panel');
+    //$('<div/>', {
+    //            id:             'rangeslider' + type + '-' + index,
+    //           'class':        'rslider',
+    //            'data-role':    'rangeslider'
+    //}).appendTo('#left-panel');
     // Izquierdo
-    $('<input/>', {
-        id:             'range' + type + '-' + index,
-        'type':         'range',
-        'min':          '0',
-        'max':          '100',
-        'value':        '40'
-    }).appendTo('#rangeslider' + type + '-' + index);
+    //$('<input/>', {
+    //    id:             'range' + type + '-' + index,
+    //    'type':         'range',
+    //    'min':          '0',
+    //    'max':          '100',
+    //    'value':        '40'
+    //}).appendTo('#rangeslider' + type + '-' + index);
     // Derecho
-    $('<input/>', {
-        id:             'range' + type + '-' + index,
-        'type':         'range',
-        'min':          '0',
-        'max':          '100',
-        'value':        '80'
-    }).appendTo('#rangeslider' + type + '-' + index);
+    //$('<input/>', {
+    //    id:             'range' + type + '-' + index,
+    //    'type':         'range',
+    //    'min':          '0',
+    //    'max':          '100',
+    //    'value':        '80'
+    //}).appendTo('#rangeslider' + type + '-' + index);
     
-    $('#select-flipswitch-' + type + '-' + index).on("change", function () {
-        if($(this).val() == 'si') {
-            $('.rslider').show();
-        } else {
-            $('.rslider').hide();
-        }
-    });
+    //$('#select-flipswitch-' + type + '-' + index).on("change", function () {
+    //    if($(this).val() == 'si') {
+    //        $('.rslider').show();
+    //    } else {
+    //        $('.rslider').hide();
+    //    }
+    //});
     
     if(Object.keys(periods).length > 1) { // Si hay más de un tipo de periodo
 
@@ -395,6 +418,7 @@ function initialize() {
     
     $(".newSelect").remove();  
     $("#left-panel").empty();
+    $("#right-panel").empty();
 
     // Filas
     for(var i = 0; i < stub.length; i++) {
@@ -413,8 +437,15 @@ function initialize() {
 }
 
 function draw() {
+
     var temp = [];
     var key = [];
+    var indexS = variables.indexOf(spatials[0]); // Controlar que no sea -1
+    var indexT = variables.indexOf(temporals[0]);
+    var diff = {};
+    
+    d3.selectAll("svg").remove();
+    
     $(".newSelect").each(function (i) { 
         if ($(this).val() != '') {  // Comprueba que no está vacío.
            if (!($(this).val() instanceof Array)) { // En caso de selección simple, incluir la opción en un array de 1 elemento.
@@ -427,11 +458,28 @@ function draw() {
        }
     });
     var dataset = [];
+    var spatial; // Etiquetas de variables espaciales.
     key = cartesian(key);
+    
     for(var i = 0; i < key.length; i++) {
-      dataset.push(valueMap[key[i]]);
+      temp = [];
+      temp.push(key[i]);
+      temp.push(valueMap[key[i]]);
+      if(indexS != -1) {
+        spatial = labels[variables[indexS]][key[i][indexS]];
+        temp.push(spatial);
+        if(diff[spatial] == undefined) {
+          diff[spatial] = 0; // Array asociativo con las posibles opciones de etiquetas espaciales.
+        }
+      }
+      dataset.push(temp);
     }
-    drawBarChart(dataset);    
+    // Ordenar cronológicamente
+    dataset = dataset.sort(function(a,b) {
+      return a[0][indexT] > b[0][indexT]; // Comparar columna con código de dato temporal.
+    });
+    
+    drawBarChart(dataset, diff);    
 }
 
 /*
