@@ -13,22 +13,23 @@
         <link rel="stylesheet" href="style/jquery.mobile-1.4.2.min.css" />
         <link rel="stylesheet" href="style/graphics.css" />
         <link rel="stylesheet" href="style/loading.css" />
-        <link rel="stylesheet" href="style/menu.css" />
+        <link rel="stylesheet" href="style/index.css" />
         <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.4.2.min.js"></script>
         <script type="text/javascript" src="js/d3.min.js" charset="utf-8"></script>
         <script type="text/javascript" src="js/d3.tip.v0.6.3.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
-        <script type="text/javascript" src="js/graphics.js"></script>
+        <script type="text/javascript" src="js/bar-chart.js"></script>
+        <script type="text/javascript" src="js/line-chart.js"></script>
         <script type="text/javascript" src="js/geolocation.js"></script>     
         
     </head>
     <body>
         <!-- Main page -->
         <div data-role="page" id="main-page">
-            <header>
+            <div data-role="header" id="page1-header" data-position="fixed" data-theme="b">
                 <h1>PULSEC</h1>
-            </header>
+            </div>
             <div id='loadingDiv'>
               <img src="style/images/ajax-loader.gif" class="ajax-loader"/>
               <h3 id='loadingText' class="ajax-loader-text">
@@ -48,25 +49,28 @@
         
         <!-- Page1 -->
         <div data-role="page" id="page1">
-            <div data-role="header">
+            <div data-role="header" id="page1-header" data-position="fixed">
                 <a href="index.html" data-role="button" data-icon="back">Back</a>
                 <h1 id="hdr-h1">PULSEC</h1>
                 <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
-                  <a id="btn-bar-chart" href="#" data-role="button" data-icon="gear">Gráfica Barras</a>
-                  <a id="btn-line-chart" href="#" data-role="button" data-icon="grid">Gráfica Líneas</a>
+                  <a id="btn-bar-chart" href="#" data-role="button" data-icon="chart-bar" data-iconpos="notext" data-mini="true">Gráfica Barras</a>
+                  <a id="btn-line-chart" href="#" data-role="button" data-icon="chart-line" data-iconpos="notext" data-mini="true">Gráfica Líneas</a>
+                  <a id="btn-line-chart" href="#" data-role="button" data-icon="chart-pie" data-iconpos="notext" data-mini="true">Gráfica Sectores</a>
                 </div>
             </div>
             <div role="main" id="page1-main" class="ui-content">
-              
                 <a id="open-left-panel" href="#left-panel" data-role="button" data-icon="carat-r" data-iconpos="notext">Abrir</a> 
                 
-                <div id="graphics"></div>
-                
+                <div id="graphics">
+                  <div id="page1-info">
+                    Acceda al menú lateral para seleccionar los datos que desea visualizar.
+                  </div>
+                </div>
             </div>
-            <div data-role="panel" id="left-panel" data-position="left" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">   
+            <div data-role="panel" id="left-panel" data-position="left"  style="overflow-y: scroll" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">   
             </div>
             <div data-role="panel" id="right-panel" data-position="right" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">   
-              <div id="legend"></div>
+              <div id="legend" class="ui-content"></div>
             </div>
         </div>
         

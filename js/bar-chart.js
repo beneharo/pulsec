@@ -1,10 +1,12 @@
 function drawBarChart(dataset, diff) {
    
-  var margin = {top: 20, right: 75, bottom: 20, left: 75};
+  var margin = {top: 40, right: 20, bottom: 40, left: 40};
   var w = $("#page1-main").innerWidth() - margin.left - margin.right;
-  var h = 200;
-  var barPadding = 1;                                   // Separación entre las barras.
+  var h = window.innerHeight - $("#page1-header").innerHeight() - margin.bottom - margin.top;
+  var barPadding = 5;                                   // Separación entre las barras.
   var barWidth = (w / dataset.length) - barPadding;     // Anchura de cada una de las barras.
+  var legend_width = 200;
+  var legend_height = 500;
   
   var xScale = d3.scale.linear()
     .domain([0, dataset.length])
@@ -18,8 +20,6 @@ function drawBarChart(dataset, diff) {
   var xAxis = d3.svg.axis().scale(xScale);
   var yAxis = d3.svg.axis().scale(yScale).ticks(5).orient("left");
   
-  assignColors(diff);
-  
   function Y0() {
     return yScale(0);
   }
@@ -29,17 +29,18 @@ function drawBarChart(dataset, diff) {
   }
   
   d3.selectAll("svg").remove();
-
+  $("#page1-info").hide();
+  
   var svg = d3.select("#graphics")
             .append("svg")
             .attr("width", w + margin.left + margin.right)
-            .attr("height", h + margin.top + margin.bottom)
+            .attr("height", h)
             .attr("preserveAspectRatio", "none")
             .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            .attr("transform", "translate(" + margin.left + ",0)");
 
   var g = svg.select("g")
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+          .attr("transform", "translate(" + margin.left + ",0)");
 
   var tip = d3.tip()
   .attr('class', 'd3-tip')
@@ -82,14 +83,15 @@ function drawBarChart(dataset, diff) {
       .attr("transform", "translate(0, 0)")
       .call(yAxis);
       
+   
    var legend = d3.select("#right-panel").append("svg")
       .attr("class", "legend")
-      .attr("width", 100)
-      .attr("height", 100)
+      .attr("width", legend_width)
+      .attr("height", legend_height)
       .selectAll("g")
       .data(Object.keys(diff))
       .enter().append("g")
-      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + i * 20 + ")"; });
 
   legend.append("rect")
       .attr("width", 18)
@@ -101,26 +103,4 @@ function drawBarChart(dataset, diff) {
       .attr("y", 9)
       .attr("dy", ".35em")
       .text(function(d) { return d;});
-}
-
-/*
- * Recibe un array asociativo con un conjunto de etiquetas a las que asociarles un color.
- * Modifica el mismo array para incluir los colores asignados.
- */
-function assignColors(ar) {
-  var size = Object.keys(ar).length;
-  var t = 255 / size;
-  var r, g, b, rgb;
-  r = 0;
-  g = t/2;
-  b = t;
-
-  for(var k in ar) {
-    rgb = d3.rgb(r, g, b);
-    ar[k] = rgb;
-    r += t;
-    g += t;
-    b += t;
-  }
-  
 }

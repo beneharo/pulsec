@@ -7,3 +7,8 @@
   stroke: #000;
   shape-rendering: crispEdges;
 }
+
+path {
+	stroke-width: 1;
+	fill: none;
+}

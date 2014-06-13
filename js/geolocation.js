@@ -22,7 +22,7 @@ function showCurrentLocation(position){
   },
   dataType: "xml",
   success: function (xml) {
-    var location = $(xml).find('state').first().text();
+    location = $(xml).find('state').first().text();
     alert("Su localización es: " + location);
   }   
 });

@@ -1,0 +1,46 @@
+#open-left-panel {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    display:block;
+}
+
+.ui-icon-chart-bar:after {
+	background-image: url("images/icons/chart-bar.png");
+}
+
+.ui-icon-chart-line:after {
+	background-image: url("images/icons/chart-line.png");
+}
+
+.ui-icon-chart-pie:after {
+	background-image: url("images/icons/chart-pie.png");
+}
+
+#page1 .ui-header {
+    height : 40px;
+}
+
+#page1-info {
+  text-align:center;
+  vertical-align:middle;
+}
+
+.ui-selectmenu.ui-popup .ui-input-search {
+    margin-left: .5em;
+    margin-right: .5em;
+}
+.ui-selectmenu.ui-dialog .ui-content {
+    padding-top: 0;
+}
+.ui-selectmenu.ui-dialog .ui-selectmenu-list {
+    margin-top: 0;
+}
+.ui-selectmenu.ui-popup .ui-selectmenu-list li.ui-first-child .ui-btn {
+    border-top-width: 1px;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+}
+.ui-selectmenu.ui-dialog .ui-header {
+    border-bottom-width: 1px;
+}

@@ -1,6 +1,9 @@
 
-var URL_INDICADORES = "tmp/indicadores.json";
+var URL_INDICADORES = "assets/indicadores.json";
 var URL = "http://banot.etsii.ull.es/alu4240/getJSON.php";
+var BAR_CHART = 1;
+var LINE_CHART = 2;
+var AREA_CHART = 3;
 var title = "";         // Título del recurso que se está obteniendo.
 var stub = "";          // Variables que van en las filas del dataset.
 var heading = "";       // Variables que van en las columnas del dataset.
@@ -16,11 +19,13 @@ var data = "";          // Información de las variables.
 var valueMap = {};
 var indicador = "";
 var periods = {}; // M: Mensual, Q: Trimestral, Y: Anual
+var location;
 
 $(document).ready(function(){
   
   initializeSelect();
-
+  //findMyCurrentLocation();
+  
   $("#btnLocateMe").click(function(){
     findMyCurrentLocation();
   });
@@ -29,6 +34,7 @@ $(document).ready(function(){
     if(indicador != $("#select-indicadores").val()) {   
       indicador = $("#select-indicadores").val();
       d3.selectAll("svg").remove();  // Borra el área de representación.
+      $("#page1-info").show();      // Muestra el mensaje de ayuda.
       try {
         loadData(indicador);
         initialize();
@@ -40,7 +46,11 @@ $(document).ready(function(){
   });
   
   $("#btn-bar-chart").click(function(){
-    draw();
+    draw(BAR_CHART);
+  });
+  
+  $("#btn-line-chart").click(function(){
+    draw(LINE_CHART);
   });
   
   var $loading = $('#loadingDiv').hide();
@@ -68,6 +78,8 @@ $(document).on('pagecreate', '#page1', function() {
         $("open-left-panel").attr('data-icon','carat-r');
     });
     initialize();
+    // Información de Geolocalización
+    //$("#right-panel").html("Usted se encuentra en <h2>" +  location + "</h2>");
 });
 
 function initializeSelect() {
@@ -113,7 +125,7 @@ function successJSON (jsondata) {
   stub = jsondata['stub'];
   heading = jsondata['heading'];
 
-  $("#hdr-h1").html("PULSEC / " + title);
+  $("#hdr-h1").html(title);
   
   var tmp;
   
@@ -176,7 +188,9 @@ function successJSON (jsondata) {
     }
   }
 }
-            
+/**
+ * Carga la información del archivo JSON que se encuentre en la URL indicada. 
+ */          
 function loadData(urlData) {
   urlData = urlData.replace("&", ";;amp;;");
   $.ajax({
@@ -209,56 +223,6 @@ function fillSelectors(variable, type, index) {
   
   // Comprueba que es una variable temporal
   if(temporals.indexOf(variable) != -1) {
-    //$('<label/>', {
-    //  'for':        'select-flipswitch-' + type + '-' + index,
-    //  html:         'Rango'
-    //}).appendTo('#left-panel');
-    //$('<select/>', {
-    //  name:         'select-flipswitch-' + type + '-' + index,
-    //  id:           'select-flipswitch-' + type + '-' + index,
-    //  'data-role':  'flipswitch',
-    //  'data-native-menu': 'false'
-    //}).appendTo('#left-panel');
-    //$('<option/>', {
-    //    value: 'si',
-    //    html: 'Sí'
-    //}).appendTo('#select-flipswitch-' + type + '-' + index);
-    //$('<option/>', {
-    //    value: 'no',
-    //    html: 'No'
-    //}).appendTo('#select-flipswitch-' + type + '-' + index);
-    
-    // RangeSlider
-    
-    //$('<div/>', {
-    //            id:             'rangeslider' + type + '-' + index,
-    //           'class':        'rslider',
-    //            'data-role':    'rangeslider'
-    //}).appendTo('#left-panel');
-    // Izquierdo
-    //$('<input/>', {
-    //    id:             'range' + type + '-' + index,
-    //    'type':         'range',
-    //    'min':          '0',
-    //    'max':          '100',
-    //    'value':        '40'
-    //}).appendTo('#rangeslider' + type + '-' + index);
-    // Derecho
-    //$('<input/>', {
-    //    id:             'range' + type + '-' + index,
-    //    'type':         'range',
-    //    'min':          '0',
-    //    'max':          '100',
-    //    'value':        '80'
-    //}).appendTo('#rangeslider' + type + '-' + index);
-    
-    //$('#select-flipswitch-' + type + '-' + index).on("change", function () {
-    //    if($(this).val() == 'si') {
-    //        $('.rslider').show();
-    //    } else {
-    //        $('.rslider').hide();
-    //    }
-    //});
     
     if(Object.keys(periods).length > 1) { // Si hay más de un tipo de periodo
 
@@ -309,14 +273,19 @@ function fillSelectors(variable, type, index) {
           html:         'Anual'
         }).appendTo('#radio-group');
       }
-      
+      //Seleccionar el primer elemento radio por defecto
+      $('input:radio[name=radio-b]:nth(0)').attr('checked',true);
       $(".radio-b").checkboxradio("refresh");
       
       $("#radio-group").bind( "change", function(event, ui) {
         fillTemporalSelectors('select-' + type + '-' + index, variable);
-        $("#" + selectorName + ' option:first').attr('selected','selected');
+        // Selecciona las 5 primeras opciones por defecto
+        for(var i = 0; i < 5; i++) {
+          $("#" + selectorName + " option:eq(" + i + ")").prop('selected', true);
+        }
         $("#" + selectorName).selectmenu("refresh");
       });
+      
     }
     // Define el menú de selección
     $('<select/>', {
@@ -331,7 +300,16 @@ function fillSelectors(variable, type, index) {
     // Rellena el menú de selección
     var selectorName = 'select-' + type + '-' + index;
     fillTemporalSelectors(selectorName, variable);
-  
+
+    // Selecciona las 5 primeras opciones por defecto
+    for(var i = 0; i < 5; i++) {
+      $("#" + selectorName + " option:eq(" + i + ")").prop('selected', true);
+    }
+    // Seleccionar Todo
+    //$("#" + selectorName + " option").each(function() {
+      // $(this).attr('selected','selected');
+    //});
+
   } else if(spatials.indexOf(variable) != -1) { // Variable Espacial
     // Define el menú de selección
     $('<select/>', {
@@ -436,7 +414,11 @@ function initialize() {
 
 }
 
-function draw() {
+/**
+ *  Prepara los datos y realiza la representación del gráfico según
+ *   el tipo (chart) recibido como parámetro. 
+ */
+function draw(chart) {
 
     var temp = [];
     var key = [];
@@ -479,7 +461,52 @@ function draw() {
       return a[0][indexT] > b[0][indexT]; // Comparar columna con código de dato temporal.
     });
     
-    drawBarChart(dataset, diff);    
+    assignColors(diff);
+    
+    // Selección del tipo de gráfico
+    switch(chart) {
+      case BAR_CHART:
+        drawBarChart(dataset, diff);
+        break;
+      case LINE_CHART:
+        drawLineChart(dataset, diff);
+        break;
+    }
+        
+}
+
+/*
+ * Recibe un array asociativo con un conjunto de etiquetas a las que asociarles un color.
+ * Modifica el mismo array para incluir los colores asignados.
+ */
+function assignColors(ar) {
+  var colors = [
+    "#008000", // Green
+    "#FF4000", // OrangeRed
+    "#000080", // Navy
+    "#FFD800", // Gold
+    "#FF00FF", // Magenta
+    "#000000", // Black
+    "#00FF00", // Lime
+    "#FF0000", // Red
+    "#0000FF", // Blue
+    "#FFFF00", // Yellow
+    "A05030", // Sienna
+    "800080" // DarkMagenta
+  ];
+  var h, s, l, hsl;
+  var size = 360 / ar.length;
+  var i = 0;
+  
+  for(var k in ar) {
+    //h = Math.floor(Math.random() * 360);
+    //s = 1;
+    //l = Math.random() * 0.5;
+    //hsl = d3.hsl(h, s, l);
+    ar[k] = colors[i];
+    i++;
+  }
+  
 }
 
 /*
