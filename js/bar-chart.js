@@ -1,3 +1,11 @@
+/**
+ * Función para dibujar un gráfico de barras.
+ * Cada barra representará una variable temporal diferente.
+ * 
+ * @param {Object} dataset
+ * @param {Object} diff
+ */
+
 function drawBarChart(dataset, diff) {
    
   var margin = {top: 40, right: 20, bottom: 40, left: 40};
@@ -11,7 +19,7 @@ function drawBarChart(dataset, diff) {
   var xScale = d3.scale.linear()
     .domain([0, dataset.length])
     .range([0, w]);
-
+  
   var yScale = d3.scale.linear()
           .domain(d3.extent(dataset.map(function(d) { return d[1];} )))
           .range([h, 0])

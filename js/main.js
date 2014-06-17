@@ -3,7 +3,7 @@ var URL_INDICADORES = "assets/indicadores.json";
 var URL = "http://banot.etsii.ull.es/alu4240/getJSON.php";
 var BAR_CHART = 1;
 var LINE_CHART = 2;
-var AREA_CHART = 3;
+var DONUT_CHART = 3;
 var title = "";         // Título del recurso que se está obteniendo.
 var stub = "";          // Variables que van en las filas del dataset.
 var heading = "";       // Variables que van en las columnas del dataset.
@@ -22,6 +22,7 @@ var periods = {}; // M: Mensual, Q: Trimestral, Y: Anual
 var location;
 
 $(document).ready(function(){
+  var info = $("#page1-info");
   
   initializeSelect();
   //findMyCurrentLocation();
@@ -34,7 +35,7 @@ $(document).ready(function(){
     if(indicador != $("#select-indicadores").val()) {   
       indicador = $("#select-indicadores").val();
       d3.selectAll("svg").remove();  // Borra el área de representación.
-      $("#page1-info").show();      // Muestra el mensaje de ayuda.
+    info.show();                    // Muestra el mensaje de ayuda.
       try {
         loadData(indicador);
         initialize();
@@ -46,11 +47,18 @@ $(document).ready(function(){
   });
   
   $("#btn-bar-chart").click(function(){
+    info.hide();
     draw(BAR_CHART);
   });
   
   $("#btn-line-chart").click(function(){
+    info.hide();
     draw(LINE_CHART);
+  });
+  
+  $("#btn-donut-chart").click(function(){
+    info.hide();
+    draw(DONUT_CHART);
   });
   
   var $loading = $('#loadingDiv').hide();
@@ -161,7 +169,7 @@ function successJSON (jsondata) {
   
   data = jsondata['data'];
   for(var i = 0; i < data.length; i++) {
-      valueMap[data[i]['dimCodes']] = data[i]['Valor'];
+      valueMap[data[i]['dimCodes']] = Number(data[i]['Valor']); // Conversión explícita a número
   }
   
   // Tratamiento de variables temporales
@@ -441,6 +449,8 @@ function draw(chart) {
     });
     var dataset = [];
     var spatial; // Etiquetas de variables espaciales.
+    var temporal; // Etiqueta de variables temporales.
+    
     key = cartesian(key);
     
     for(var i = 0; i < key.length; i++) {
@@ -453,6 +463,10 @@ function draw(chart) {
         if(diff[spatial] == undefined) {
           diff[spatial] = 0; // Array asociativo con las posibles opciones de etiquetas espaciales.
         }
+      }
+      if(indexT != -1) {
+        temporal = labels[variables[indexT]][key[i][indexT]];
+        temp.push(temporal);
       }
       dataset.push(temp);
     }
@@ -470,6 +484,9 @@ function draw(chart) {
         break;
       case LINE_CHART:
         drawLineChart(dataset, diff);
+        break;
+      case DONUT_CHART:
+        drawDonutChart(dataset, diff);
         break;
     }
         

@@ -1,9 +1,11 @@
-/*
- * 
+/**
  * Función para dibujar un gráfico de líneas.
  * Cada línea representará una variable geográfica diferente.
  * 
+ * @param {Object} dataset
+ * @param {Object} diff
  */
+
 function drawLineChart(dataset, diff) {
   
   var margin = {top: 40, right: 20, bottom: 40, left: 40};
@@ -11,19 +13,34 @@ function drawLineChart(dataset, diff) {
   var h = window.innerHeight - $("#page1-header").innerHeight() - margin.bottom - margin.top;
   var legend_width = 200;
   var legend_height = 500;  
+  var xSize;
   
   var data = {}; // Hash Nombre - Array de datos.
-  // Inicializar arrays
-  for(var i in diff) {
-    data[i] = []; // Array vacío para cada dato geográfico.
-  }
-  for(var i = 0; i < dataset.length; i++) {
-    data[dataset[i][2]].push(dataset[i][1]); // Incluir valor en el array correspondiente.
+  
+  if($.isEmptyObject(diff)) {
+      diff["Serie"] = "#008000"; // Si no hay variables geográficas, se crea una "artificial"
+      
+      // Inicializar array para el único dato
+      data[0] = [];
+      for(var i = 0; i < dataset.length; i++) {
+        data[0].push(dataset[i][1]); // Incluir valor en el array correspondiente.
+      }
+      xSize = data[0].length - 1;
+  } else {
+  
+    // Inicializar arrays
+    for(var i in diff) {
+      data[i] = []; // Array vacío para cada dato geográfico.
+    }
+    for(var i = 0; i < dataset.length; i++) {
+      data[dataset[i][2]].push(dataset[i][1]); // Incluir valor en el array correspondiente.
+    }
+    xSize = data[Object.keys(diff)[0]].length - 1;
   }
   
   var x = d3.scale
     .linear()
-    .domain([0, data[Object.keys(diff)[0]].length - 1]) // TODO // Cambiar esto. (-1)
+    .domain([0, xSize]) // TODO // Cambiar esto. (-1)
     .range([0, w]);
   
   var y = d3.scale
@@ -65,10 +82,24 @@ function drawLineChart(dataset, diff) {
         .attr("transform", "translate(0, 0)")
         .call(yAxisLeft);
   
-  for(var l in data) {
-    graph.append("path")
-      .attr("d", lines[l](data[l]))
-      .attr("stroke", diff[l]);
+  try {
+    for(var l in data) {
+      graph.append("path")
+        .attr("d", lines[l](data[l]))
+        .attr("stroke", diff[l]);
+    }
+  } catch(err) {
+     line = d3.svg.line();
+     line.x(function(d,i) { 
+        return x(i); 
+      })
+      .y(function(d) { 
+          return y(d);
+      });
+      console.log(data[0]);
+      graph.append("path")
+        .attr("d", line(data[0]))
+        .attr("stroke", diff["Serie"]);
   }
   
   // Crear leyenda

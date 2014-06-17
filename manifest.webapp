@@ -1,6 +1,6 @@
 {
   "name": "Pulsec",
-  "version": "0.1",
+  "version": "0.8",
   "description": "Pulso Economico",
   "launch_path": "/index.html",
   "permissions": {
