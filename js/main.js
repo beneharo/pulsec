@@ -20,7 +20,7 @@ var valueMap = {};
 var indicador = "";
 var periods = {}; // M: Mensual, Q: Trimestral, Y: Anual
 var regions = {}; // P: Provincias, M: Municipios, C: Canarias, MC: Municipios Canarios
-var location;
+var geolocation;
 
 $(document).ready(function(){
   var info = $("#page1-info");
@@ -233,6 +233,25 @@ function successJSON (jsondata) {
  */          
 function loadData(urlData) {
   urlData = urlData.replace("&", ";;amp;;");
+  var txt = $("#loadingText").text();
+  txt = txt.replace(/\((.|\s)*\)/, "");
+  $("#loadingText").text(txt);
+  
+  // Calcular el tamaño del fichero a descargar.
+  var xhr = $.ajax({
+    data : {
+      urlData : indicador
+    },
+    dataType: "text",
+    url: "http://banot.etsii.ull.es/alu4240/getSize.php",
+    crossDomain: true,
+    success: function(msg){
+      var txt = $("#loadingText").text() + "(" + msg + ")";
+      $("#loadingText").text(txt);
+    }
+  });
+  
+  
   $.ajax({
       async : false,
       data : {

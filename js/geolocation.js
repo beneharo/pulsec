@@ -22,8 +22,8 @@ function showCurrentLocation(position){
   },
   dataType: "xml",
   success: function (xml) {
-    location = $(xml).find('state').first().text();
-    alert("Su localización es: " + location);
+    geolocation = $(xml).find('state').first().text();
+    alert("Su localización es: " + geolocation);
   }   
 });
 }
