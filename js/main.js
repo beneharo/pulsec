@@ -19,6 +19,7 @@ var data = "";          // Información de las variables.
 var valueMap = {};
 var indicador = "";
 var periods = {}; // M: Mensual, Q: Trimestral, Y: Anual
+var regions = {}; // P: Provincias, M: Municipios, C: Canarias, MC: Municipios Canarios
 var location;
 
 $(document).ready(function(){
@@ -37,8 +38,10 @@ $(document).ready(function(){
       d3.selectAll("svg").remove();  // Borra el área de representación.
     info.show();                    // Muestra el mensaje de ayuda.
       try {
+        $loading.show();    // Muestra la pantalla de carga hasta que termine la carga de datos.
         loadData(indicador);
         initialize();
+        $loading.hide();    // Oculta la pantalla de carga una vez ha finalizado la carga de datos.
       } catch(err) {
          alert("Error: " + err.message + "\n\n");
          $(location).attr('href', 'index.html');
@@ -46,39 +49,40 @@ $(document).ready(function(){
     }
   });
   
-  $("#btn-bar-chart").click(function(){
+  $("#btn-bar-chart").click(function() {
     info.hide();
     draw(BAR_CHART);
   });
   
-  $("#btn-line-chart").click(function(){
+  $("#btn-line-chart").click(function() {
     info.hide();
     draw(LINE_CHART);
   });
   
-  $("#btn-donut-chart").click(function(){
+  $("#btn-donut-chart").click(function() {
     info.hide();
     draw(DONUT_CHART);
   });
   
-  var $loading = $('#loadingDiv').hide();
-  $(document)
-    .ajaxStart(function () {
-      $loading.show();
-    })
-    .ajaxStop(function () {
-      $loading.hide();
-    });
+  var $loading = $('#loadingDiv').hide();   // Por defecto la pantalla de carga no se mostrará.
+
 });
 
 $(document).on('pagecreate', '#page1', function() {
     $(".newSelect").remove();
-    $("#page1").on("swiperight", function() {
-        $("#left-panel").panel("open");
-    });
-    $("#page1").on("swipeleft", function() {
-        $("#right-panel").panel("open");
-    });
+    // Eventos de gestos en pantalla para abrir paneles laterales.
+    $("#page1").on( "swipeleft swiperight", function( e ) {
+        // Comprobar que no existe otro panel abierto.
+        // Esto evitará que un gesto de cerrar un panel, abra el panel contrario.
+        if ( $.mobile.activePage.jqmData( "panel" ) !== "open" ) {
+          if ( e.type === "swipeleft"  ) {
+            $( "#right-panel" ).panel( "open" );
+          } else if ( e.type === "swiperight" ) {
+            $( "#left-panel" ).panel( "open" );
+          }
+        }
+      });
+    
     $("#left-panel").on("panelopen", function() {
         $("open-left-panel").buttonMarkup({ icon: "carat-l" });
     });
@@ -179,6 +183,7 @@ function successJSON (jsondata) {
   var regExpQ = /^\d{4}Q\d{1}$/; // Detección del código Trimestre
   periods = {};                   // Se reinicia la variable.
   
+  // Para cada variables temporal...
   for(var i = 0; i < temporals.length; i++) {
     
     for(var j = 0; j < codes[temporals[i]].length; j++) {
@@ -193,6 +198,33 @@ function successJSON (jsondata) {
       } else {
         // Variable sin contemplar
       }
+    }
+  }
+  
+  // Tratamiento de variables espaciales
+  
+  var regExpProvincia = /^ES\d{2}$/;        // Detección de Provincia
+  var regExpMunicipio = /^ES\d{2}\d+$/;     // Detección de Municipio
+  var regExpCanarias = /^ES70\d$/;          // Detección de Islas Canarias
+  var regExpMunCanarias = /^3(5|8)\d{3}$/;  // Detección de municipios de Canarias
+  regions = {};
+  
+  for(var i = 0; i < spatials.length; i++) {
+    for(var j = 0; j < codes[spatials[i]].length; j++) {
+      code = codes[spatials[i]][j];
+      
+      if(regExpProvincia.test(code)) {
+        regions['P'] = true;
+      } else if(regExpCanarias.test(code)) {
+        regions['C'] = true;
+      } else if(regExpMunicipio.test(code)) {
+        regions['M'] = true;
+      }  else if(regExpMunCanarias.test(code)) {
+        regions['MC'] = true;
+      } else {
+        // Variable sin contemplar
+      }
+      
     }
   }
 }
@@ -319,6 +351,90 @@ function fillSelectors(variable, type, index) {
     //});
 
   } else if(spatials.indexOf(variable) != -1) { // Variable Espacial
+    // TODO
+    if(Object.keys(regions).length > 1) { // Si hay más de un tipo de región
+      $('<div/>', {
+          'data-role':       'ui-field-contain',
+          'id':              'div-group-region'
+        }).appendTo('#left-panel');
+      
+      $('<fieldset/>', {
+          'data-role':       'controlgroup',
+          'id':              'radio-group-region',
+          'name':            'radio-group-region'
+        }).appendTo('#div-group-region');
+      // Opción para cargar todas las variables
+      $('<input/>', {
+        'type':       'radio',
+        'name':       'radio-r',
+        'value':      'ALL',
+        'id':         'radio-all'
+      }).appendTo('#radio-group-region');
+      $('<label/>', {
+        'for':        'radio-all',
+        html:         'Todos'
+      }).appendTo('#radio-group-region');
+        
+      if(regions['P'] != undefined) {
+        $('<input/>', {
+          'type':       'radio',
+          'name':       'radio-r',
+          'value':      'P',
+          'id':         'radio-provincia'
+        }).appendTo('#radio-group-region');
+        $('<label/>', {
+          'for':        'radio-provincia',
+          html:         'Provincias'
+        }).appendTo('#radio-group-region');
+      }
+      if(regions['M'] != undefined) {
+        $('<input/>', {
+          'type':       'radio',
+          'name':       'radio-r',
+          'value':      'M',
+          'id':         'radio-municipio'
+        }).appendTo('#radio-group-region');
+        $('<label/>', {
+          'for':        'radio-municipio',
+          html:         'Municipios'
+        }).appendTo('#radio-group-region');
+      }
+      if(regions['C'] != undefined) {
+        $('<input/>', {
+          'type':       'radio',
+          'name':       'radio-r',
+          'value':      'C',
+          'id':         'radio-canarias'
+        }).appendTo('#radio-group-region');
+        $('<label/>', {
+          'for':        'radio-canarias',
+          html:         'Canarias'
+        }).appendTo('#radio-group-region');
+      }
+      if(regions['MC'] != undefined) {
+        $('<input/>', {
+          'type':       'radio',
+          'name':       'radio-r',
+          'value':      'MC',
+          'id':         'radio-mun-canarias'
+        }).appendTo('#radio-group-region');
+        $('<label/>', {
+          'for':        'radio-mun-canarias',
+          html:         'Municipios de Canarias'
+        }).appendTo('#radio-group-region');
+      }
+      //Seleccionar el primer elemento radio por defecto
+      $('input:radio[name=radio-r]:nth(0)').attr('checked',true);
+      $(".radio-r").checkboxradio("refresh");
+      
+      $("#radio-group-region").bind( "change", function(event, ui) {
+        fillSpatialSelectors('select-' + type + '-' + index, variable);
+        // Selecciona la primera opcion por defecto
+        $("#" + selectorName + " option:eq(0)").prop('selected', true);
+        $("#" + selectorName).selectmenu("refresh");
+      });
+    }
+    // TODO
     // Define el menú de selección
     $('<select/>', {
       name:         'select-' + type + '-' + index,
@@ -329,13 +445,12 @@ function fillSelectors(variable, type, index) {
       'data-native-menu': 'false'
     }).appendTo('#left-panel');
     
-    for(var j = 0; j < codes[variable].length; j++) {
-      code = codes[variable][j];
-      $('<option/>', {
-          value: code,
-          html: labels[variable][code]
-      }).appendTo('#select-' + type + '-' + index);
-    }
+    // Rellena el menú de selección
+    var selectorName = 'select-' + type + '-' + index;
+    fillSpatialSelectors(selectorName, variable);
+    
+    // Marca la primera opción por defecto
+    $("#" + selectorName + " option:eq(0)").prop('selected', true);
     
   } else { // Variable dimensión medida.
     // Define el menú de selección
@@ -358,6 +473,11 @@ function fillSelectors(variable, type, index) {
   
   // Selecciona por defecto la primera opción.
   $('#select-' + type + '-' + index + ' option:first').attr('selected','selected');
+  
+  // Diálogo
+  $('#select-' + type + '-' + index + '-dialog').bind('dialogclose', function(event) {
+     alert('closed');
+  });
   
 }
 /**
@@ -395,6 +515,53 @@ function fillTemporalSelectors(selectorName, variable) {
   }
 
 }
+// TODO
+/**
+ * Rellena los selectores de variables espaciales. 
+ */
+function fillSpatialSelectors(selectorName, variable) {
+  var regExpProvincia = /^ES\d{2}$/;        // Detección de Provincia
+  var regExpMunicipio = /^ES\d{2}\d+$/;     // Detección de Municipio
+  var regExpCanarias = /^ES70\d$/;          // Detección de Islas Canarias
+  var regExpMunCanarias = /^3(5|8)\d{3}$/;  // Detección de Municipios Canarios
+  
+  $('#' + selectorName).empty();
+  
+  var radioValue = $("#radio-group-region :radio:checked").val();
+  var array = codes[variable];
+     
+  if(radioValue == 'P') { // Provincias
+    array = array.filter(function(el) {
+                          return regExpProvincia.test(el);
+                        });
+  } else if(radioValue == 'M') {
+    array = array.filter(function(el) {
+                          return regExpMunicipio.test(el);
+                        });
+  } else if(radioValue == 'C') {
+    array = array.filter(function(el) {
+                          return regExpCanarias.test(el);
+                        });
+  } else if(radioValue == 'MC') {
+    array = array.filter(function(el) {
+                          return regExpMunCanarias.test(el);
+                        });
+  } else { // En caso contrario, cargar todas las variables.
+    // No se filtra el array.
+  }
+  
+  for(var j = 0; j < array.length; j++) {
+      code = array[j];
+      
+      $('<option/>', {
+          value: code,
+          html: labels[variable][code]
+      }).appendTo('#' + selectorName);
+  }
+
+}
+// TODO
+
 /**
 *   Inicializa las opciones de los menús desplegables.
 */

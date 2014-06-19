@@ -22,8 +22,7 @@ function drawBarChart(dataset, diff) {
   
   var yScale = d3.scale.linear()
           .domain(d3.extent(dataset.map(function(d) { return d[1];} )))
-          .range([h, 0])
-          .nice();
+          .range([h, 0]);
   
   var xAxis = d3.svg.axis().scale(xScale);
   var yAxis = d3.svg.axis().scale(yScale).ticks(5).orient("left");
