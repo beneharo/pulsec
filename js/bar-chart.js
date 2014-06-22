@@ -16,12 +16,16 @@ function drawBarChart(dataset, diff) {
   var legend_width = 200;
   var legend_height = 500;
   
+  var minMax = d3.extent(dataset.map(function(d) { return d[1];} ));
+  var yMin = minMax[0] - minMax[0] * 0.1;
+  var yMax = minMax[1];
+  
   var xScale = d3.scale.linear()
     .domain([0, dataset.length])
     .range([0, w]);
   
   var yScale = d3.scale.linear()
-          .domain(d3.extent(dataset.map(function(d) { return d[1];} )))
+          .domain([yMin, yMax])
           .range([h, 0]);
   
   var xAxis = d3.svg.axis().scale(xScale);
@@ -81,15 +85,19 @@ function drawBarChart(dataset, diff) {
         return rgb;
       }
     })
-    .on('mouseover', tip.show)
-    .on('mouseout', tip.hide);
+    .on('mouseover', function(d) { tip.show; $(this).attr("fill", rgb.brighter());})
+    .on('mouseout', function(d) { tip.hide; $(this).attr("fill", diff[d[2]]);});
     
     // Añadir Ejes
     svg.append("g")
       .attr("class", "axis")  //Asignación de la clase "axis" (CSS)
       .attr("transform", "translate(0, 0)")
       .call(yAxis);
-      
+
+    svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + h + ")")
+      .call(xAxis);
    
    var legend = d3.select("#right-panel").append("svg")
       .attr("class", "legend")

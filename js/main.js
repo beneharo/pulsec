@@ -1,6 +1,7 @@
 
 var URL_INDICADORES = "assets/indicadores.json";
 var URL = "http://banot.etsii.ull.es/alu4240/getJSON.php";
+var URL_SIZE = "http://banot.etsii.ull.es/alu4240/getSize.php";   // Script para determinar el tamaño del fichero JSON que será descargado.
 var BAR_CHART = 1;
 var LINE_CHART = 2;
 var DONUT_CHART = 3;
@@ -21,6 +22,7 @@ var indicador = "";
 var periods = {}; // M: Mensual, Q: Trimestral, Y: Anual
 var regions = {}; // P: Provincias, M: Municipios, C: Canarias, MC: Municipios Canarios
 var geolocation;
+var selMultiple = {}; // Control de las variables de selección multiple que han sido seleccionadas
 
 $(document).ready(function(){
   var info = $("#page1-info");
@@ -132,6 +134,7 @@ function successJSON (jsondata) {
   surveyTitle = "";
   data = "";
   valueMap = {};
+  selMultiple = {};
   
   title = jsondata['title'];
   stub = jsondata['stub'];
@@ -237,20 +240,20 @@ function loadData(urlData) {
   txt = txt.replace(/\((.|\s)*\)/, "");
   $("#loadingText").text(txt);
   
+  // TODO Comentar para desactivar "Calcular tamaño"
   // Calcular el tamaño del fichero a descargar.
   var xhr = $.ajax({
     data : {
       urlData : indicador
     },
     dataType: "text",
-    url: "http://banot.etsii.ull.es/alu4240/getSize.php",
+    url: URL_SIZE,
     crossDomain: true,
     success: function(msg){
       var txt = $("#loadingText").text() + "(" + msg + ")";
       $("#loadingText").text(txt);
     }
   });
-  
   
   $.ajax({
       async : false,
@@ -259,6 +262,7 @@ function loadData(urlData) {
       },
       dataType: "text",
       url: URL,
+      //url: urlData,
       crossDomain: true,
       type : "GET",
       success: function(jsondata) {
@@ -339,7 +343,7 @@ function fillSelectors(variable, type, index) {
       $("#radio-group").bind( "change", function(event, ui) {
         fillTemporalSelectors('select-' + type + '-' + index, variable);
         // Selecciona las 5 primeras opciones por defecto
-        for(var i = 0; i < 5; i++) {
+        for(var i = 1; i <= 5; i++) {
           $("#" + selectorName + " option:eq(" + i + ")").prop('selected', true);
         }
         $("#" + selectorName).selectmenu("refresh");
@@ -360,17 +364,49 @@ function fillSelectors(variable, type, index) {
     var selectorName = 'select-' + type + '-' + index;
     fillTemporalSelectors(selectorName, variable);
 
+    $("#" + selectorName).change(function(event) { 
+        var old_array = selMultiple[selectorName];
+        var new_array = $("#" + selectorName).val();
+        // Cuando un menú de selección está vacío, JQuery devuelve null a través de la función val().
+        // Para solventarlo, si en algún caso se detecta "null" se inicializará a la variable con un array vacío.
+        if(old_array == null) {
+          old_array = [];
+        }
+        if(new_array == null) {
+          new_array = [];
+        }
+        
+        // Si se marca la opción Seleccionar todo
+        if(diffArray(new_array, old_array).indexOf("__SELECT_ALL") != -1) {
+          // Seleccionar Todo
+          $("#" + selectorName + " option").each(function() {
+            $(this).prop('selected', true);
+          });
+          selMultiple[selectorName] = $("#" + selectorName).val();
+        } else 
+        // Si se desmarca la opción Seleccionar todo
+        if(diffArray(old_array, new_array).indexOf("__SELECT_ALL") != -1) {
+          // Deseleccionar Todo
+          $("#" + selectorName).val([]);
+          selMultiple[selectorName] = [];
+        } else {
+          selMultiple[selectorName] = $("#" + selectorName).val();
+        }
+        // Refresca el menú para observar los cambios hechos en la interfaz gráfica.
+        $("#" + selectorName).selectmenu('refresh', true);
+     
+      });
+
+
     // Selecciona las 5 primeras opciones por defecto
-    for(var i = 0; i < 5; i++) {
+    for(var i = 1; i <= 5; i++) {
       $("#" + selectorName + " option:eq(" + i + ")").prop('selected', true);
     }
-    // Seleccionar Todo
-    //$("#" + selectorName + " option").each(function() {
-      // $(this).attr('selected','selected');
-    //});
+    selMultiple[selectorName] = $("#" + selectorName).val();
+    
 
   } else if(spatials.indexOf(variable) != -1) { // Variable Espacial
-    // TODO
+
     if(Object.keys(regions).length > 1) { // Si hay más de un tipo de región
       $('<div/>', {
           'data-role':       'ui-field-contain',
@@ -449,11 +485,11 @@ function fillSelectors(variable, type, index) {
       $("#radio-group-region").bind( "change", function(event, ui) {
         fillSpatialSelectors('select-' + type + '-' + index, variable);
         // Selecciona la primera opcion por defecto
-        $("#" + selectorName + " option:eq(0)").prop('selected', true);
+        $("#" + selectorName + " option:eq(1)").prop('selected', true);
         $("#" + selectorName).selectmenu("refresh");
       });
     }
-    // TODO
+    
     // Define el menú de selección
     $('<select/>', {
       name:         'select-' + type + '-' + index,
@@ -467,9 +503,41 @@ function fillSelectors(variable, type, index) {
     // Rellena el menú de selección
     var selectorName = 'select-' + type + '-' + index;
     fillSpatialSelectors(selectorName, variable);
-    
+    // Evento de cambio
+    $("#" + selectorName).change(function(event) { 
+      var old_array = selMultiple[selectorName];
+      var new_array = $("#" + selectorName).val();
+      // Cuando un menú de selección está vacío, JQuery devuelve null a través de la función val().
+      // Para solventarlo, si en algún caso se detecta "null" se inicializará a la variable con un array vacío.
+      if(old_array == null) {
+        old_array = [];
+      }
+      if(new_array == null) {
+        new_array = [];
+      }
+      // Si se marca la opción Seleccionar todo
+      if(diffArray(new_array, old_array).indexOf("__SELECT_ALL") != -1) {
+        // Seleccionar Todo
+        $("#" + selectorName + " option").each(function() {
+          $(this).prop('selected', true);
+        });
+        selMultiple[selectorName] = $("#" + selectorName).val();
+      } else 
+      // Si se desmarca la opción Seleccionar todo
+      if(diffArray(old_array, new_array).indexOf("__SELECT_ALL") != -1) {
+        // Deseleccionar Todo
+        $("#" + selectorName).val([]);
+        selMultiple[selectorName] = [];
+      } else {
+        selMultiple[selectorName] = $("#" + selectorName).val();
+      }
+      // Refresca el menú para observar los cambios hechos en la interfaz gráfica.
+      $("#" + selectorName).selectmenu('refresh', true);
+     
+    });
+
     // Marca la primera opción por defecto
-    $("#" + selectorName + " option:eq(0)").prop('selected', true);
+    $("#" + selectorName + " option:eq(1)").prop('selected', true);
     
   } else { // Variable dimensión medida.
     // Define el menú de selección
@@ -490,13 +558,10 @@ function fillSelectors(variable, type, index) {
     }
   }
   
-  // Selecciona por defecto la primera opción.
-  $('#select-' + type + '-' + index + ' option:first').attr('selected','selected');
-  
   // Diálogo
-  $('#select-' + type + '-' + index + '-dialog').bind('dialogclose', function(event) {
-     alert('closed');
-  });
+  //$('#select-' + type + '-' + index + '-dialog').bind('dialogclose', function(event) {
+    // alert('closed');
+  //});
   
 }
 /**
@@ -524,6 +589,15 @@ function fillTemporalSelectors(selectorName, variable) {
     
   }
   
+  // Opción "Seleccionar todo"
+  // Marcándola se seleccionarán todas las opciones, desmarcándola se deseleccionará todo.
+  var opt = $('<option/>', {
+      value: "__SELECT_ALL",
+      html: "Seleccionar todo"
+  });
+
+  opt.appendTo('#' + selectorName);
+  
   for(var j = 0; j < array.length; j++) {
       code = array[j];
       
@@ -534,7 +608,6 @@ function fillTemporalSelectors(selectorName, variable) {
   }
 
 }
-// TODO
 /**
  * Rellena los selectores de variables espaciales. 
  */
@@ -569,6 +642,15 @@ function fillSpatialSelectors(selectorName, variable) {
     // No se filtra el array.
   }
   
+  // Opción "Seleccionar todo"
+  // Marcándola se seleccionarán todas las opciones, desmarcándola se deseleccionará todo.
+  var opt = $('<option/>', {
+      value: "__SELECT_ALL",
+      html: "Seleccionar todo"
+  });
+  
+  opt.appendTo('#' + selectorName);
+  
   for(var j = 0; j < array.length; j++) {
       code = array[j];
       
@@ -579,7 +661,6 @@ function fillSpatialSelectors(selectorName, variable) {
   }
 
 }
-// TODO
 
 /**
 *   Inicializa las opciones de los menús desplegables.
@@ -629,7 +710,12 @@ function draw(chart) {
              temp.push($(this).val());
              key.push(temp);
            } else {
-             key.push($(this).val()); // Genera el array que será utilizado como key.
+             temp = [];
+             temp = $(this).val();
+             if(temp.indexOf("__SELECT_ALL") != -1) { // Si detecta esta opción, la elimina antes de utilizarla en la representación.
+               temp.shift();
+             }
+             key.push(temp); // Genera el array que será utilizado como key.
            }
        }
     });
@@ -694,8 +780,15 @@ function assignColors(ar) {
     "#FF0000", // Red
     "#0000FF", // Blue
     "#FFFF00", // Yellow
-    "A05030", // Sienna
-    "800080" // DarkMagenta
+    "#A05030", // Sienna
+    "#800080", // DarkMagenta
+    "#90C830", // YellowGreen
+    "#800000", // DarkRed
+    "#80D0F0", // LightSkyBlue
+    "#D0A020", // GoldenRod
+    "#F08070", // Salmon
+    "#800080", // Purple
+    "#C0C0C0" // Silver
   ];
   var h, s, l, hsl;
   var size = 360 / ar.length;
@@ -709,7 +802,6 @@ function assignColors(ar) {
     ar[k] = colors[i];
     i++;
   }
-  
 }
 
 /*
@@ -731,3 +823,20 @@ function cartesian(arg) {
     helper([], 0);
     return r;
 };
+
+/**
+ * Diferencia entre dos arrays.
+ * Devuelve el array diferencia. 
+ */
+function diffArray(a, b) {
+  var seen = [], diff = [];
+  for( var i = 0; i < b.length; i++) {
+    seen[b[i]] = true;
+  }
+  for(var i = 0; i < a.length; i++) {
+    if(!seen[a[i]]) {
+      diff.push(a[i]);
+    }
+  }
+  return diff;
+}
