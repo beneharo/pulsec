@@ -4,8 +4,24 @@
         "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=f0ef18a3-e36b-4910-8b04-ef61640ac1e4"
     },
     {
+        "indicador": "Precios de Vivienda Protegida",
+        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=5b21eada-226f-40e4-8a90-c49e27cacd7a"
+    },
+    {
+        "indicador": "Encuesta de Población Activa: Estimaciones en pequeñas áreas de Canarias",
+        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=17042f58-7541-416a-b5c8-6056bfa2ae14"
+    },
+    {
         "indicador": "Movimiento Laboral Registrado",
         "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=565542b6-0423-49e1-a035-059089ff6cec"
+    },
+    {
+        "indicador": "Empleo registrado",
+        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=93702daa-81b0-48da-b7fc-813494bc5968"
+    },
+    {
+        "indicador": "Paro registrado",
+        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=6ff86581-806d-4fae-a0a2-651c0e43cc05"
     },
     {
         "indicador": "Afiliación a la Seguridad Social",
@@ -16,13 +32,25 @@
         "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=986c0763-26c3-4a1d-a3bc-d80ff3a90b71"
     },
     {
-        "indicador": "Empleo registrado",
-        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=93702daa-81b0-48da-b7fc-813494bc5968"
-    },
-    {
         "indicador": "Precio del petróleo (barril Brent) por periodos",
         "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=edd99b9d-f974-4f64-a1a2-9ffc396a33d5"
-    },  
+    },
+    {
+        "indicador": "Producción y consumo de energía eléctrica",
+        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=5686a445-bfce-4858-b2fc-c4f681d10059"
+    },
+    {
+        "indicador": "Índices de Comercio al por Menor",
+        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=76d3b440-5020-4328-ba9a-ac19134e6d0e"
+    },
+    {
+        "indicador": "Índices de Producción Industrial",
+        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=fde63a38-fb3c-4f3b-a5d8-82eaceeaf204"
+    },
+    {
+        "indicador": "Tráfico de pasajeros, aviones y mercancías",
+        "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=b9266c2a-88f6-43ae-a96f-1073025787ee"
+    },
     {
         "indicador": "Tráfico marítimo de Puertos Canarios",
         "url": "http://www.gobiernodecanarias.org/istac/jaxi-istac/tabla.do?accion=jsonMtd&uuidConsulta=45513f72-d109-4fbd-9e57-9d3249deab4d"

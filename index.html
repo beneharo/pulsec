@@ -1,5 +1,5 @@
 <!-- 
-    PulsEc
+    PULSEC
     Beneharo González González
     2014
 -->
@@ -37,9 +37,21 @@
                 Sus datos están siendo descargados...
               </h3>
             </div>
-            <div data-role="content" class="ui-content">
-
-                <label for="select-indicadores">Seleccione un indicador:</label>
+            <div class="ui-content" role="main">
+                <div class="ui-corner-all custom-corners">
+                  <div class="ui-bar ui-bar-a">
+                    ¡Bienvenido a <b>PULSEC</b>!
+                  </div>
+                  <div class="ui-body ui-body-a">
+                    <p>
+                      A través de nuestra aplicación podrá realizar un análisis sencillo
+                       de indicadores de coyuntura económica.
+                    </p>
+                  </div>
+                </div>
+                <div class="ui-body ui-body-e ui-corner-all">
+                  <p>A continuación seleccione el indicador que desea consultar:</p>
+                </div>
                 <select id="select-indicadores" name="select-indicadores">
                 </select>
                 <a href="#page1"> <button id="btn-page1" >Visualización</button> </a>
@@ -52,26 +64,49 @@
         <div data-role="page" id="page1">
             <div data-role="header" id="page1-header" data-position="fixed">
                 <a href="index.html" data-role="button" data-icon="back">Back</a>
-                <h1 id="hdr-h1">PULSEC</h1>
-                <div class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
+                <div id="group-graphics-buttons" class="ui-btn-right" data-role="controlgroup" data-type="horizontal">
                   <a id="btn-bar-chart" href="#" data-role="button" data-icon="chart-bar" data-iconpos="notext" data-mini="true">Gráfica Barras</a>
                   <a id="btn-line-chart" href="#" data-role="button" data-icon="chart-line" data-iconpos="notext" data-mini="true">Gráfica Líneas</a>
                   <a id="btn-donut-chart" href="#" data-role="button" data-icon="chart-pie" data-iconpos="notext" data-mini="true">Gráfica Sectores</a>
                 </div>
             </div>
             <div role="main" id="page1-main" class="ui-content">
-                <a id="open-left-panel" href="#left-panel" data-role="button" data-icon="carat-r" data-iconpos="notext">Abrir</a> 
+                <a id="open-left-panel" href="#left-panel" data-role="button" data-icon="carat-r" data-iconpos="notext">Abrir Panel Izquierdo</a> 
+                <a id="open-right-panel" href="#right-panel" data-role="button" data-icon="carat-l" data-iconpos="notext">Abrir Panel Derecho</a>
                 
                 <div id="graphics">
-                  <div id="page1-info">
-                    Acceda al menú lateral para seleccionar los datos que desea visualizar.
+                  <div id="page1-info1" class="ui-body ui-body-a ui-corner-all">
+                    Acceda al menú lateral izquierdo para seleccionar los datos que desea visualizar.
+                  </div>
+                  <div id="page1-info2" class="ui-body ui-body-a ui-corner-all">
+                    En el menú derecho encontrará información complementaria a la visualización.
                   </div>
                 </div>
             </div>
-            <div data-role="panel" id="left-panel" data-position="left"  style="overflow-y: scroll" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">   
+            <div data-role="panel" id="left-panel" data-position="left" style="overflow-y: scroll" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">   
             </div>
-            <div data-role="panel" id="right-panel" data-position="right" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">   
-              <div id="legend" class="ui-content"></div>
+            <div data-role="panel" id="right-panel" data-position="right" style="overflow-y: scroll" data-display="overlay" data-position-fixed="true" class="ui-responsive-panel">   
+              <div class="ui-corner-all custom-corners">
+                <div class="ui-bar ui-bar-a">
+                    Información
+                </div>
+                <div id="right-panel-info" class="ui-body ui-body-a">
+                  <p>
+                    Este espacio está destinado a mostrar información complementaria al gráfico que se esté visualizando.
+                  </p>
+                </div>
+              </div>
+              <div class="ui-corner-all custom-corners">
+                <div class="ui-bar ui-bar-a">
+                    Leyenda
+                </div>
+                <div id="legend-panel" class="ui-body ui-body-a">
+  
+                </div>
+              </div>
+            </div>
+            <div data-role="footer" id="page1-footer" data-position="fixed" data-theme="a">
+              <h4 id="ftr-h1">PULSEC</h4>
             </div>
         </div>
         
@@ -81,7 +116,7 @@
                 <a href="index.html" data-role="button" data-icon="back">Back</a>
                 <h1>PULSEC</h1>
             </div>
-            <div data-role="content" class="ui-content">
+            <div class="ui-content" role="main">
                 <a href="#" id="btnLocateMe" data-role="button">LocateMe</a>
                 <div id="searchResults"></div>  
             </div>

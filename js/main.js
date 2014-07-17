@@ -23,9 +23,25 @@ var periods = {}; // M: Mensual, Q: Trimestral, Y: Anual
 var regions = {}; // P: Provincias, M: Municipios, C: Canarias, MC: Municipios Canarios
 var geolocation;
 var selMultiple = {}; // Control de las variables de selección multiple que han sido seleccionadas
+var lastOpt = 0;      // Almacena la última opción seleccionada.
+var regExpCCAA = /^ES\d{2}$/;             // Detección de Comunidades Autónomas
+var regExpProvincia = /^ES\d{2}\d+$/;     // Detección de Provincias
+var regExpCanarias = /^ES70\d$/;          // Detección de Islas Canarias
+var regExpMunCanarias = /^3(5|8)\d{3}$/;  // Detección de municipios de Canarias
+  
+
+$(window).on("orientationchange", function(event) { 
+  if($.mobile.activePage.attr('id') == "page1") {
+    if(lastOpt != 0) {
+      draw(lastOpt);
+    }
+  }; 
+});
 
 $(document).ready(function(){
-  var info = $("#page1-info");
+  var info1 = $("#page1-info1");
+  var info2 = $("#page1-info2");
+  var rightPanelInfo = $("#right-panel-info");
   
   initializeSelect();
   //findMyCurrentLocation();
@@ -38,7 +54,9 @@ $(document).ready(function(){
     if(indicador != $("#select-indicadores").val()) {   
       indicador = $("#select-indicadores").val();
       d3.selectAll("svg").remove();  // Borra el área de representación.
-    info.show();                    // Muestra el mensaje de ayuda.
+      info1.show();                   // Muestra el mensaje de ayuda.
+      info2.show(); 
+      lastOpt = 0;                   // La última opción cargada se reinicia.
       try {
         $loading.show();    // Muestra la pantalla de carga hasta que termine la carga de datos.
         loadData(indicador);
@@ -52,17 +70,26 @@ $(document).ready(function(){
   });
   
   $("#btn-bar-chart").click(function() {
-    info.hide();
+    info1.hide();
+    info2.hide();
+    actualizarInformacion();
+    lastOpt = BAR_CHART;
     draw(BAR_CHART);
   });
   
   $("#btn-line-chart").click(function() {
-    info.hide();
+    info1.hide();
+    info2.hide();
+    actualizarInformacion();
+    lastOpt = LINE_CHART;
     draw(LINE_CHART);
   });
   
   $("#btn-donut-chart").click(function() {
-    info.hide();
+    info1.hide();
+    info2.hide();
+    actualizarInformacion();
+    lastOpt = DONUT_CHART;
     draw(DONUT_CHART);
   });
   
@@ -90,6 +117,12 @@ $(document).on('pagecreate', '#page1', function() {
     });
     $("#left-panel").on("panelclose", function() {
         $("open-left-panel").attr('data-icon','carat-r');
+    });
+    $("#right-panel").on("panelopen", function() {
+        $("open-right-panel").buttonMarkup({ icon: "carat-r" });
+    });
+    $("#right-panel").on("panelclose", function() {
+        $("open-right-panel").attr('data-icon','carat-l');
     });
     initialize();
     // Información de Geolocalización
@@ -140,7 +173,7 @@ function successJSON (jsondata) {
   stub = jsondata['stub'];
   heading = jsondata['heading'];
 
-  $("#hdr-h1").html(title);
+  $("#ftr-h1").html(title);
   
   var tmp;
   
@@ -204,24 +237,19 @@ function successJSON (jsondata) {
     }
   }
   
-  // Tratamiento de variables espaciales
-  
-  var regExpProvincia = /^ES\d{2}$/;        // Detección de Provincia
-  var regExpMunicipio = /^ES\d{2}\d+$/;     // Detección de Municipio
-  var regExpCanarias = /^ES70\d$/;          // Detección de Islas Canarias
-  var regExpMunCanarias = /^3(5|8)\d{3}$/;  // Detección de municipios de Canarias
+  // Tratamiento de variables espaciales 
   regions = {};
   
   for(var i = 0; i < spatials.length; i++) {
     for(var j = 0; j < codes[spatials[i]].length; j++) {
       code = codes[spatials[i]][j];
       
-      if(regExpProvincia.test(code)) {
-        regions['P'] = true;
+      if(regExpCCAA.test(code)) {
+        regions['CCAA'] = true;
       } else if(regExpCanarias.test(code)) {
         regions['C'] = true;
-      } else if(regExpMunicipio.test(code)) {
-        regions['M'] = true;
+      } else if(regExpProvincia.test(code)) {
+        regions['P'] = true;
       }  else if(regExpMunCanarias.test(code)) {
         regions['MC'] = true;
       } else {
@@ -240,7 +268,6 @@ function loadData(urlData) {
   txt = txt.replace(/\((.|\s)*\)/, "");
   $("#loadingText").text(txt);
   
-  // TODO Comentar para desactivar "Calcular tamaño"
   // Calcular el tamaño del fichero a descargar.
   var xhr = $.ajax({
     data : {
@@ -394,9 +421,7 @@ function fillSelectors(variable, type, index) {
         }
         // Refresca el menú para observar los cambios hechos en la interfaz gráfica.
         $("#" + selectorName).selectmenu('refresh', true);
-     
       });
-
 
     // Selecciona las 5 primeras opciones por defecto
     for(var i = 1; i <= 5; i++) {
@@ -404,7 +429,6 @@ function fillSelectors(variable, type, index) {
     }
     selMultiple[selectorName] = $("#" + selectorName).val();
     
-
   } else if(spatials.indexOf(variable) != -1) { // Variable Espacial
 
     if(Object.keys(regions).length > 1) { // Si hay más de un tipo de región
@@ -427,9 +451,21 @@ function fillSelectors(variable, type, index) {
       }).appendTo('#radio-group-region');
       $('<label/>', {
         'for':        'radio-all',
-        html:         'Todos'
+        html:         'Todo'
       }).appendTo('#radio-group-region');
-        
+
+      if(regions['CCAA'] != undefined) {
+        $('<input/>', {
+          'type':       'radio',
+          'name':       'radio-r',
+          'value':      'CCAA',
+          'id':         'radio-ccaa'
+        }).appendTo('#radio-group-region');
+        $('<label/>', {
+          'for':        'radio-ccaa',
+          html:         'Comunidades Autónomas'
+        }).appendTo('#radio-group-region');
+      }
       if(regions['P'] != undefined) {
         $('<input/>', {
           'type':       'radio',
@@ -440,18 +476,6 @@ function fillSelectors(variable, type, index) {
         $('<label/>', {
           'for':        'radio-provincia',
           html:         'Provincias'
-        }).appendTo('#radio-group-region');
-      }
-      if(regions['M'] != undefined) {
-        $('<input/>', {
-          'type':       'radio',
-          'name':       'radio-r',
-          'value':      'M',
-          'id':         'radio-municipio'
-        }).appendTo('#radio-group-region');
-        $('<label/>', {
-          'for':        'radio-municipio',
-          html:         'Municipios'
         }).appendTo('#radio-group-region');
       }
       if(regions['C'] != undefined) {
@@ -558,11 +582,6 @@ function fillSelectors(variable, type, index) {
     }
   }
   
-  // Diálogo
-  //$('#select-' + type + '-' + index + '-dialog').bind('dialogclose', function(event) {
-    // alert('closed');
-  //});
-  
 }
 /**
  * Rellena los selectores de variables temporales. 
@@ -598,6 +617,11 @@ function fillTemporalSelectors(selectorName, variable) {
 
   opt.appendTo('#' + selectorName);
   
+  // Ordenar los periodos de más reciente a menos reciente 
+  array = array.sort(function(a,b) {
+    return a < b;
+  });
+  
   for(var j = 0; j < array.length; j++) {
       code = array[j];
       
@@ -612,23 +636,19 @@ function fillTemporalSelectors(selectorName, variable) {
  * Rellena los selectores de variables espaciales. 
  */
 function fillSpatialSelectors(selectorName, variable) {
-  var regExpProvincia = /^ES\d{2}$/;        // Detección de Provincia
-  var regExpMunicipio = /^ES\d{2}\d+$/;     // Detección de Municipio
-  var regExpCanarias = /^ES70\d$/;          // Detección de Islas Canarias
-  var regExpMunCanarias = /^3(5|8)\d{3}$/;  // Detección de Municipios Canarios
-  
+
   $('#' + selectorName).empty();
   
   var radioValue = $("#radio-group-region :radio:checked").val();
   var array = codes[variable];
      
-  if(radioValue == 'P') { // Provincias
+  if(radioValue == 'CCAA') { // Comunidades Autónomas
+    array = array.filter(function(el) {
+                          return regExpCCAA.test(el);
+                        });
+  } else if(radioValue == 'P') {
     array = array.filter(function(el) {
                           return regExpProvincia.test(el);
-                        });
-  } else if(radioValue == 'M') {
-    array = array.filter(function(el) {
-                          return regExpMunicipio.test(el);
                         });
   } else if(radioValue == 'C') {
     array = array.filter(function(el) {
@@ -671,7 +691,7 @@ function initialize() {
     
     $(".newSelect").remove();  
     $("#left-panel").empty();
-    $("#right-panel").empty();
+    $("#right-panel-info").show();
 
     // Filas
     for(var i = 0; i < stub.length; i++) {
@@ -795,10 +815,6 @@ function assignColors(ar) {
   var i = 0;
   
   for(var k in ar) {
-    //h = Math.floor(Math.random() * 360);
-    //s = 1;
-    //l = Math.random() * 0.5;
-    //hsl = d3.hsl(h, s, l);
     ar[k] = colors[i];
     i++;
   }
@@ -839,4 +855,34 @@ function diffArray(a, b) {
     }
   }
   return diff;
+}
+
+/**
+ * Actualiza la información de panel lateral derecho. 
+ */
+function actualizarInformacion() {
+  var info = $("#right-panel-info");
+  var text = "Actualmente en pantalla: </br>";
+   $(".newSelect").each(function (i) { 
+        if ($(this).val() != '') {  // Comprueba que no está vacío.
+           if (!($(this).val() instanceof Array)) { // Información de los elementos de selección simple
+              var id = $(this).attr('id');
+              var label = $("label[for='" + id + "']").html().replace(":", "");
+              var val = labels[label][$(this).val()];
+              text += "<p><b>" + label + ":</b>  " + val + "</p>";
+           } else { // Elementos de selección múltiple
+             var id = $(this).attr('id');
+             var label = $("label[for='" + id + "']").html().replace(":", "");
+             if(temporals.indexOf(label) != -1) { // Incluir rango temporal seleccionado (primero y último)
+               var code1 = $(this).val()[$(this).val().length - 1];
+               var code2 = $(this).val()[0];
+               var p1 = labels[label][code1];
+               var p2 = labels[label][code2];
+               text += "<p>Periodo comprendido entre <b>" + p1 + "</b> y <b>" + p2 + "</b></p>";
+             }
+           }
+         }
+   });
+
+  info.html(text);
 }

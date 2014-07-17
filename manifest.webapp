@@ -1,6 +1,6 @@
 {
-  "name": "Pulsec",
-  "version": "0.8",
+  "name": "PULSEC",
+  "version": "1.0",
   "description": "Pulso Economico",
   "launch_path": "/index.html",
   "permissions": {
@@ -14,7 +14,7 @@
   "developer": {
     "name": "Beneharo Gonzalez Gonzalez",
     "mail": "alu0100404937@ull.edu.es",
-    "url": "http://github.com/beneharo"
+    "url": "http://github.com/beneharo/pulsec"
   },
   "icons": {
     "60": "/img/main-60.png",

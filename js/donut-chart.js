@@ -85,14 +85,14 @@ function drawDonutChart(dataset, diff) {
       .text(function(d) { return d[0].temporal; });
   
   // Leyenda
-  var legend = d3.select("#right-panel").append("svg")
+  var legend = d3.select("#legend-panel").append("svg")
       .attr("class", "legend")
       .attr("width", legend_width)
       .attr("height", legend_height)
       .selectAll("g")
       .data(Object.keys(diff))
       .enter().append("g")
-      .attr("transform", function(d, i) { return "translate(" + margin.left + "," + i * 20 + ")"; });
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
   legend.append("rect")
       .attr("width", 18)

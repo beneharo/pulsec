@@ -16,3 +16,15 @@ path {
 .arc {
   stroke: #fff;
 }
+
+.tip {
+  line-height: 1;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+.tip-value {
+  font-weight: bold;
+}
