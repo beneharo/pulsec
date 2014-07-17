@@ -8,9 +8,9 @@
 
 function drawBarChart(dataset, diff) {
    
-  var margin = {top: 40, right: 20, bottom: 40, left: 40};
+  var margin = {top: 40, right: 40, bottom: 40, left: 40};
   var w = $("#page1-main").innerWidth() - margin.left - margin.right;
-  var h = window.innerHeight - $("#page1-header").innerHeight() - margin.bottom - margin.top;
+  var h = window.innerHeight - $("#page1-header").innerHeight() - $("#page1-footer").innerHeight() - margin.bottom - margin.top;
   var barPadding = 5;                                   // Separación entre las barras.
   var barWidth = (w / dataset.length) - barPadding;     // Anchura de cada una de las barras.
   var legend_width = 200;
@@ -54,10 +54,11 @@ function drawBarChart(dataset, diff) {
           .attr("transform", "translate(" + margin.left + ",0)");
 
   var tip = d3.tip()
-  .attr('class', 'd3-tip')
-  .offset([-3, 0])
-  .html(function(d) {
-    return "<span style='color:red'>" + d[0] + "; " + d[1] + "</span>";
+    .attr('class', 'tip')
+    .offset([50, 0])
+    .direction(function(d, i) { if(i < dataset.length / 2) {return 'ne';} else {return 'nw';} })
+    .html(function(d) {
+      return "<span class='tip-value'>" + d[1] + "</span></br><span>" + d[3] + "</span>";
   });
     
   svg.call(tip);
@@ -85,8 +86,10 @@ function drawBarChart(dataset, diff) {
         return rgb;
       }
     })
-    .on('mouseover', function(d) { tip.show; $(this).attr("fill", rgb.brighter());})
-    .on('mouseout', function(d) { tip.hide; $(this).attr("fill", diff[d[2]]);});
+    .on('mouseover', tip.show)
+    .on('mouseout', tip.hide);
+    //.on('mouseover', function(d) {$(this).attr("fill", rgb.brighter()); })
+    //.on('mouseout', function(d) {$(this).attr("fill", diff[d[2]]); tip.hide;});
     
     // Añadir Ejes
     svg.append("g")

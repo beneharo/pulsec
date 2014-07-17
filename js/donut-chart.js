@@ -9,23 +9,28 @@
 
 function drawDonutChart(dataset, diff) {
   
-  var margin = {top: 40, right: 20, bottom: 40, left: 40};
+  var margin = {top: 40, right: 20, bottom: 40, left: 20};
   var w = $("#page1-main").innerWidth() - margin.left - margin.right;
   var h = window.innerHeight - $("#page1-header").innerHeight() - margin.bottom - margin.top;
   var legend_width = 200;
   var legend_height = 500;
   
-  var size = d3.min([w, h]);
-  
+  var size = d3.max([w, h]) / 2; // El tamaño será la mitad de la pantalla para poder visualizar dos gráficos simultáneamente.
   var radius;
   var padding = 10;
-  
   var arc;
-
   var pie;
-
   var hash = {};
   var label;
+  
+  function getPercent(d){
+    return Math.round(1000*(d.endAngle-d.startAngle)/(Math.PI*2)) / 10 + '%';
+  }
+  
+  // Ordenar de mayor a menor valor
+  dataset = dataset.sort(function(a,b) {
+    return a[1] < b[1]; // Comparar columna con código de dato temporal.
+  });
   
   dataset.forEach(function(d) {
     label = d[3];
@@ -50,18 +55,30 @@ function drawDonutChart(dataset, diff) {
       .data(vector)
     .enter().append("svg")
       .attr("class", "pie")
-      .attr("width", radius * 2 + margin.right + margin.left)
-      .attr("height", radius * 2 + margin.top + margin.bottom)
+      .attr("width", margin.left + margin.right + radius * 2)
+      .attr("height", radius * 2)
     .append("g")
-      .attr("transform", "translate(" + (radius) + "," + (radius) + ")");
+      .attr("transform", "translate(" + (margin.left + margin.right + radius) + "," + (radius) + ")");
+
+  var tip = d3.tip()
+    .attr('class', 'tip')
+    .offset([50, 0])
+    .direction(function(d, i) { if(i < dataset.length / 2) {return 'ne';} else {return 'nw';} })
+    .html(function(d) {
+      var percent = getPercent(d);
+      return "<span class='tip-value'>" + percent + "</span></br><span>" + d.data.temporal + "</span>";
+  });
+    
+  svg.call(tip);
 
   svg.selectAll(".arc")
       .data(function(d) { return pie(d); })
     .enter().append("path")
       .attr("class", "arc")
       .attr("d", arc)
-      .style("fill", function(d) { return d.data.color; }); // Pie devuelve un array de arcos. La información original está dentro del objeto "data"
-
+      .style("fill", function(d) { return d.data.color; }) // Pie devuelve un array de arcos. La información original está dentro del objeto "data"
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);
   svg.append("text")
       .attr("dy", ".25em")
       .style("text-anchor", "middle")

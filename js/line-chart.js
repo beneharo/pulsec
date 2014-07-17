@@ -8,9 +8,9 @@
 
 function drawLineChart(dataset, diff) {
   
-  var margin = {top: 40, right: 20, bottom: 40, left: 40};
+  var margin = {top: 40, right: 40, bottom: 40, left: 40};
   var w = $("#page1-main").innerWidth() - margin.left - margin.right;
-  var h = window.innerHeight - $("#page1-header").innerHeight() - margin.bottom - margin.top;
+  var h = window.innerHeight - $("#page1-header").innerHeight() - $("#page1-footer").innerHeight() - margin.bottom - margin.top;
   var legend_width = 200;
   var legend_height = 500;  
   var xSize;
